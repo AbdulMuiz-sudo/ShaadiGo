@@ -1,0 +1,127 @@
+/* Centering the login card on the screen *
+
+/* Ensure the container allows the form to move down */
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    /* Changed from 'center' to allow margin-top to work */
+    min-height: 100vh;
+    padding-top: 50px;
+    /* Extra push from the top */
+    background: #222;
+}
+
+/* Heading style */
+/* Using the parent class makes the style 'stronger' so it overrides other files */
+.auth-form {
+    background: #222;
+    /* 1. Decreased padding (from 3rem to 1.5rem) to shrink the length */
+    padding: 1.5rem 2.5rem;
+    border-radius: 10px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+    width: 100%;
+
+    /* 2. Adjusted width to look better with a shorter height */
+    max-width: 450px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    /* Slightly tighter gap */
+    border: 1px solid #333;
+
+    /* 3. This lowers the form down from the top of the screen */
+    margin-top: 50px;
+}
+
+.auth-form .loginmsg1 {
+    font-size: 2rem;
+    /* !important is a last resort to force the change */
+    font-weight: 800;
+    color: #fcfaf5;
+    /* Direct hex code to test if it changes */
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    display: flex;
+    text-align: center;
+}
+
+.auth-form .loginmsg2 {
+    font-size: 1rem !important;
+    font-weight: 400;
+    color: #e7e5e5;
+    margin-bottom: 1.5rem;
+    display: flex;
+    text-align: center;
+}
+
+/* Input group layout */
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.input-group label {
+    font-weight: 600;
+    color: #eee;
+    /* White/Light gray for visibility */
+    font-size: 0.9rem;
+}
+
+/* Input field styling */
+.input-group input {
+    padding: 12px 15px;
+    background: #333;
+    /* Darker inputs for dark theme */
+    border: 2px solid #444;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #fff;
+    /* White text when typing */
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+/* Focus state */
+.input-group input:focus {
+    border-color: var(--primary-color, #ffcc00);
+    background: #3a3a3a;
+    box-shadow: 0 0 8px rgba(255, 204, 0, 0.2);
+}
+
+/* Login button styling */
+.submit-btn {
+    background-color: var(--primary-color, #ffcc00);
+    color: #f3eeee;
+    /* Dark text on bright button looks more professional */
+    padding: 14px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+}
+
+.submit-btn:hover {
+    background-color: #e6b800;
+    /* Slightly darker yellow */
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 204, 0, 0.3);
+}
+
+.submit-btn:active {
+    transform: translateY(0);
+}
+
+.toggle-text {
+    font-size: 1rem !important;
+    font-weight: 400;
+    color: #e7e5e5;
+    margin-bottom: 1.5rem;
+    display: flex;
+    text-align: center;
+}
