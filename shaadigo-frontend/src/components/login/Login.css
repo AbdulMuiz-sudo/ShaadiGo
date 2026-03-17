@@ -1,127 +1,161 @@
-/* Centering the login card on the screen *
+/* Login.css */
 
-/* Ensure the container allows the form to move down */
-.login-container {
+/* 1. Wrapper to ensure Aurora and Form stay layered correctly */
+.login-page-wrapper {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
     display: flex;
     justify-content: center;
-    align-items: flex-start;
-    /* Changed from 'center' to allow margin-top to work */
-    min-height: 100vh;
-    padding-top: 50px;
-    /* Extra push from the top */
-    background: #222;
+    align-items: center;
+    overflow: hidden;
+    background-color: #fff9e6;
+    /* Fallback yellowish background */
 }
 
-/* Heading style */
-/* Using the parent class makes the style 'stronger' so it overrides other files */
-.auth-form {
-    background: #222;
-    /* 1. Decreased padding (from 3rem to 1.5rem) to shrink the length */
-    padding: 1.5rem 2.5rem;
-    border-radius: 10px;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+/* 2. Positioning the Aurora Background */
+.aurora-bg-container {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
-
-    /* 2. Adjusted width to look better with a shorter height */
-    max-width: 450px;
-
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    /* Slightly tighter gap */
-    border: 1px solid #333;
-
-    /* 3. This lowers the form down from the top of the screen */
-    margin-top: 50px;
+    height: 100%;
+    z-index: 0;
+    /* Behind everything */
 }
 
-.auth-form .loginmsg1 {
-    font-size: 2rem;
-    /* !important is a last resort to force the change */
-    font-weight: 800;
-    color: #fcfaf5;
-    /* Direct hex code to test if it changes */
-    margin-bottom: 0.5rem;
-    text-transform: uppercase;
+/* 3. Centering the Login Card */
+.login-container {
+    position: relative;
+    z-index: 1;
+    /* Sits on top of Aurora */
     display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 20px;
+}
+
+/* 4. The Specialized Card (Red/Yellow Theme) */
+.auth-form {
+    width: 100%;
+    max-width: 420px;
+    background: rgba(255, 255, 255, 0.95);
+    /* Semi-transparent white */
+    padding: 40px;
+    border-radius: 28px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 193, 7, 0.4);
     text-align: center;
 }
 
-.auth-form .loginmsg2 {
-    font-size: 1rem !important;
-    font-weight: 400;
-    color: #e7e5e5;
-    margin-bottom: 1.5rem;
-    display: flex;
-    text-align: center;
+/* 5. The SHAADIGO Logo (Centered at top) */
+.auth-form::before {
+    content: "SHAADIGO";
+    display: block;
+    font-size: 2.2rem;
+    font-weight: 900;
+    color: #d32f2f;
+    /* Primary Red */
+    letter-spacing: 2px;
+    margin-bottom: 25px;
+    font-family: 'Times New Roman', serif;
+    border-bottom: 4px solid #ffc107;
+    /* Yellow Accent */
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+    padding-bottom: 5px;
 }
 
-/* Input group layout */
+.loginmsg1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.loginmsg2 {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 30px;
+}
+
+/* 6. Inputs & Groups */
 .input-group {
+    margin-bottom: 18px;
+    text-align: left;
+    /* Align labels to left */
     display: flex;
     flex-direction: column;
-    gap: 8px;
 }
 
 .input-group label {
-    font-weight: 600;
-    color: #eee;
-    /* White/Light gray for visibility */
-    font-size: 0.9rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #d32f2f;
+    margin-bottom: 6px;
+    text-transform: uppercase;
 }
 
-/* Input field styling */
 .input-group input {
-    padding: 12px 15px;
-    background: #333;
-    /* Darker inputs for dark theme */
-    border: 2px solid #444;
-    border-radius: 8px;
+    padding: 14px 16px;
     font-size: 1rem;
-    color: #fff;
-    /* White text when typing */
-    transition: all 0.3s ease;
+    border: 2px solid #f0f0f0;
+    border-radius: 12px;
     outline: none;
+    transition: all 0.3s ease;
 }
 
-/* Focus state */
+/* Interaction: Focus turns Yellow */
 .input-group input:focus {
-    border-color: var(--primary-color, #ffcc00);
-    background: #3a3a3a;
-    box-shadow: 0 0 8px rgba(255, 204, 0, 0.2);
+    border-color: #ffc107;
+    background-color: #fffdf2;
+    box-shadow: 0 0 12px rgba(255, 193, 7, 0.2);
 }
 
-/* Login button styling */
+/* 7. The Submit Button (Pill Style) */
 .submit-btn {
-    background-color: var(--primary-color, #ffcc00);
-    color: #f3eeee;
-    /* Dark text on bright button looks more professional */
-    padding: 14px;
-    border: none;
-    border-radius: 8px;
+    width: 100%;
+    margin-top: 15px;
+    padding: 16px;
     font-size: 1.1rem;
     font-weight: 700;
+    color: white;
+    background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
+    border: none;
+    border-radius: 50px;
     cursor: pointer;
     transition: all 0.3s ease;
-    margin-top: 10px;
+    box-shadow: 0 4px 15px rgba(211, 47, 47, 0.3);
 }
 
 .submit-btn:hover {
-    background-color: #e6b800;
-    /* Slightly darker yellow */
+    background: #ffc107;
+    /* Yellow on hover */
+    color: #d32f2f;
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(255, 204, 0, 0.3);
+    box-shadow: 0 6px 20px rgba(255, 193, 7, 0.4);
 }
 
-.submit-btn:active {
-    transform: translateY(0);
-}
-
+/* 8. Toggle Text */
 .toggle-text {
-    font-size: 1rem !important;
-    font-weight: 400;
-    color: #e7e5e5;
-    margin-bottom: 1.5rem;
-    display: flex;
-    text-align: center;
+    margin-top: 25px;
+    font-size: 0.95rem;
+    color: #d32f2f;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.toggle-text:hover {
+    color: #ffc107;
+}
+
+/* Responsiveness */
+@media (max-width: 480px) {
+    .auth-form {
+        padding: 30px 20px;
+        max-width: 90%;
+    }
 }
