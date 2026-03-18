@@ -1,19 +1,21 @@
 /* Login.css */
 
-/* 1. Wrapper to ensure Aurora and Form stay layered correctly */
+/* 1. Page Wrapper & Centering */
 .login-page-wrapper {
     position: relative;
     width: 100vw;
-    height: 100vh;
+    min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
     overflow: hidden;
-    background-color: #fff9e6;
-    /* Fallback yellowish background */
+    /* Keeps Aurora contained */
+    background-color: #fdfbf7;
+    /* Fallback cream color */
+    padding: 20px;
 }
 
-/* 2. Positioning the Aurora Background */
+/* 2. Positioning Aurora as the Background */
 .aurora-bg-container {
     position: absolute;
     top: 0;
@@ -24,138 +26,146 @@
     /* Behind everything */
 }
 
-/* 3. Centering the Login Card */
+/* 3. The Form Container */
 .login-container {
     position: relative;
     z-index: 1;
     /* Sits on top of Aurora */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    padding: 20px;
-}
-
-/* 4. The Specialized Card (Red/Yellow Theme) */
-.auth-form {
     width: 100%;
     max-width: 420px;
-    background: rgba(255, 255, 255, 0.95);
-    /* Semi-transparent white */
-    padding: 40px;
-    border-radius: 28px;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
-    border: 1px solid rgba(255, 193, 7, 0.4);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* 4. Branding (Logo Area) */
+.branding-section {
+    margin-bottom: 20px;
     text-align: center;
 }
 
-/* 5. The SHAADIGO Logo (Centered at top) */
-.auth-form::before {
-    content: "SHAADIGO";
-    display: block;
-    font-size: 2.2rem;
-    font-weight: 900;
-    color: #d32f2f;
-    /* Primary Red */
-    letter-spacing: 2px;
-    margin-bottom: 25px;
-    font-family: 'Times New Roman', serif;
-    border-bottom: 4px solid #ffc107;
-    /* Yellow Accent */
-    width: fit-content;
-    margin-left: auto;
-    margin-right: auto;
-    padding-bottom: 5px;
+.login-logo-img {
+    width: 180px;
+    height: auto;
+    /* mix-blend-mode: multiply; removes white background from logo if needed */
+    mix-blend-mode: multiply;
+    filter: drop-shadow(0px 4px 10px rgba(0, 0, 0, 0.1));
 }
 
+/* 5. The Login Card (Glassmorphism Effect) */
+.auth-card {
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.9);
+    /* Semi-transparent white */
+    backdrop-filter: blur(10px);
+    /* Frosted glass effect to show Aurora colors */
+    padding: 40px;
+    border-radius: 24px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    /* Soft Gold border */
+    text-align: center;
+    box-sizing: border-box;
+}
+
+/* 6. Typography */
 .loginmsg1 {
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: #333;
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    color: #8e1534;
+    /* ShaadiGo Maroon */
     margin-bottom: 5px;
 }
 
 .loginmsg2 {
-    font-size: 0.9rem;
-    color: #666;
+    font-family: sans-serif;
+    font-size: 0.85rem;
+    color: #555;
     margin-bottom: 30px;
 }
 
-/* 6. Inputs & Groups */
-.input-group {
-    margin-bottom: 18px;
+/* 7. Input Styling */
+.input-group-premium {
+    margin-bottom: 22px;
     text-align: left;
-    /* Align labels to left */
-    display: flex;
-    flex-direction: column;
+    position: relative;
 }
 
-.input-group label {
-    font-size: 0.8rem;
+.premium-label {
+    position: absolute;
+    top: -10px;
+    left: 12px;
+    background: white;
+    padding: 0 8px;
+    font-size: 0.75rem;
     font-weight: 700;
-    color: #d32f2f;
-    margin-bottom: 6px;
-    text-transform: uppercase;
+    color: #c7a460;
+    /* Gold */
+    z-index: 2;
 }
 
-.input-group input {
-    padding: 14px 16px;
-    font-size: 1rem;
-    border: 2px solid #f0f0f0;
-    border-radius: 12px;
-    outline: none;
-    transition: all 0.3s ease;
-}
-
-/* Interaction: Focus turns Yellow */
-.input-group input:focus {
-    border-color: #ffc107;
-    background-color: #fffdf2;
-    box-shadow: 0 0 12px rgba(255, 193, 7, 0.2);
-}
-
-/* 7. The Submit Button (Pill Style) */
-.submit-btn {
+.input-group-premium input {
     width: 100%;
-    margin-top: 15px;
-    padding: 16px;
-    font-size: 1.1rem;
+    padding: 15px;
+    border: 1.5px solid #d4af37;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    outline: none;
+    box-sizing: border-box;
+    transition: 0.3s;
+}
+
+.input-group-premium input:focus {
+    border-color: #8e1534;
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
+}
+
+/* 8. Links and Buttons */
+.forgot-password-link {
+    text-align: right;
+    margin-top: -10px;
+    margin-bottom: 25px;
+}
+
+.forgot-password-link a {
+    font-size: 0.8rem;
+    color: #8e1534;
+    text-decoration: none;
     font-weight: 700;
+}
+
+.submit-btn-premium {
+    width: 100%;
+    background-color: #8e1534;
     color: white;
-    background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
+    padding: 16px;
     border: none;
     border-radius: 50px;
+    font-weight: 700;
     cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(211, 47, 47, 0.3);
+    transition: 0.3s;
 }
 
-.submit-btn:hover {
-    background: #ffc107;
-    /* Yellow on hover */
-    color: #d32f2f;
+.submit-btn-premium:hover {
+    background-color: #6d0f28;
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(255, 193, 7, 0.4);
+    box-shadow: 0 10px 20px rgba(142, 21, 52, 0.3);
 }
 
-/* 8. Toggle Text */
-.toggle-text {
+.toggle-text-premium {
     margin-top: 25px;
-    font-size: 0.95rem;
-    color: #d32f2f;
-    font-weight: 600;
+    font-size: 0.85rem;
     cursor: pointer;
-    transition: color 0.2s;
 }
 
-.toggle-text:hover {
-    color: #ffc107;
+.highlight-text {
+    color: #8e1534;
+    font-weight: 700;
 }
 
-/* Responsiveness */
+/* Responsive */
 @media (max-width: 480px) {
-    .auth-form {
+    .auth-card {
         padding: 30px 20px;
-        max-width: 90%;
     }
 }

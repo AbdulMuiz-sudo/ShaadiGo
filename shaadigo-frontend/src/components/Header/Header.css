@@ -1,0 +1,321 @@
+/* General Reset & Variables */
+:root {
+  --primary-color: #f39c12;
+  /* Solar Orange */
+  --secondary-color: #2c3e50;
+  /* Dark Blue/Gray */
+  --text-white: #ffffff;
+  --transition: all 0.3s ease;
+  --header-height: 80px;
+  /* Reference for consistency */
+}
+
+.header {
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  background: transparent;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* Header turns dark on hover or when scrolling (if you add logic later) */
+.header:hover {
+  background: #222;
+  color: white;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Navigation Layout */
+.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: var(--header-height);
+}
+
+.branding-sectionheader {
+  margin-bottom: 5px;
+}
+
+.header-logo-img {
+  width: 140px;
+  /* Adjust size as needed */
+  height: auto;
+  filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.1));
+}
+
+/* Better visibility on dark hover */
+
+/* Nav Links */
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  height: 100%;
+  /* Important for dropdown hover area */
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.nav-links a:hover {
+  color: var(--primary-color);
+}
+
+/* Social Icons */
+.social-icons {
+  display: flex;
+  gap: 15px;
+  margin-left: 20px;
+  border-left: 1px solid rgba(255, 255, 255, 0.2);
+  padding-left: 20px;
+}
+
+.social-icon {
+  font-size: 1.2rem;
+  color: white;
+  transition: var(--transition);
+}
+
+/* --- MEGA MENU LOGIC --- */
+
+.header-main {
+  position: static;
+  width: 100%;
+}
+
+/* Dropdown trigger */
+.dropdown {
+  position: static;
+  /* Required for full-width child */
+  display: flex;
+  align-items: center;
+  height: 100%;
+  /* No gap between top of nav and bottom */
+  cursor: pointer;
+}
+
+/* The actual Mega Menu */
+.dropdown-mega-menu {
+  display: none;
+  position: absolute;
+  top: var(--header-height);
+  /* Starts exactly at 80px */
+  left: 0;
+  right: 0;
+  background-color: #222;
+  z-index: 1000;
+  border-top: 1px solid #333;
+  /* Bridge: This invisible area prevents closing when moving mouse down */
+  padding-top: 2px;
+  min-width: 1200px;
+
+}
+
+/* Show menu when hovering over the container OR the menu itself */
+.dropdown:hover .dropdown-mega-menu {
+  display: flex;
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Dropdown Content Interior */
+.headerpage-container {
+  display: flex;
+  justify-content: center;
+  gap: 120px;
+  padding: 60px 0;
+  max-width: 2000px;
+  width: 100%;
+}
+
+.headerpage-content {
+  text-align: center;
+  width: 300px;
+}
+
+.headerpage-content .image-container img {
+  height: 150px;
+  width: auto;
+  object-fit: contain;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.headerpage-content:hover img {
+  transform: scale(1.1);
+}
+
+.headerpage-content h3 {
+  color: #ffffff;
+  font-size: 1.1rem;
+  letter-spacing: 3px;
+  margin: 25px 0;
+  text-transform: uppercase;
+  font-weight: 300;
+}
+
+.link-group {
+  display: flex;
+  gap: 30px;
+  justify-content: center;
+}
+
+.link-group a {
+  color: #777 !important;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  padding-bottom: 5px;
+}
+
+.link-group a:hover {
+  color: #ffffff !important;
+  border-bottom: 2px solid var(--primary-color);
+}
+
+/* Mobile Toggle */
+.menu-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 30px;
+  height: 21px;
+}
+
+.menu-toggle span {
+  height: 3px;
+  width: 100%;
+  background-color: white;
+  border-radius: 3px;
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+  font-weight: bolder;
+  font-size: 2rem;
+  margin-bottom: 5px;
+  margin-left: 50px;
+  color: #ffffff;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .menu-toggle {
+    display: flex;
+  }
+
+  .nav-links {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 80%;
+    height: 100vh;
+    background-color: #111;
+    flex-direction: column;
+    padding-top: 100px;
+    transition: 0.4s ease;
+  }
+
+  .nav-links-active {
+    right: 0;
+  }
+
+  .dropdown-mega-menu {
+    position: relative;
+    top: 0;
+    display: none;
+    background-color: #222;
+  }
+
+  .dropdown:hover .dropdown-mega-menu {
+    display: block;
+  }
+
+  .headerpage-container {
+    flex-direction: column;
+    align-items: center;
+    gap: 50px;
+    padding: 30px 0;
+  }
+}
+
+.user-menu-container {
+  position: relative;
+  /* This keeps the menu anchored to the icon */
+  display: inline-block;
+}
+
+.user-profile-icon {
+  font-size: 2rem;
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.user-profile-icon:hover {
+  transform: scale(1.1);
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 50px;
+  /* Adjust based on your navbar height */
+  right: 0;
+  background-color: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 8px;
+  width: 180px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.menu-item {
+  padding: 12px 16px;
+  color: white;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.3s;
+}
+
+.menu-item:hover {
+  background-color: #333;
+  color: #ccc014;
+}
+
+.menu-item.logout {
+  border-top: 1px solid #333;
+  color: #ff4d4d;
+}
+
+.menu-item.logout:hover {
+  background-color: #ff4d4d;
+  color: white;
+}
