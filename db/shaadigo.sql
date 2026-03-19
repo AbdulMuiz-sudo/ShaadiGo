@@ -55,7 +55,7 @@ CREATE TABLE VenueImages (
 
 /* ==============================
    4. TERMS & CONDITIONS
-   (before Bookings — FK dependency)
+   (before Bookings â€” FK dependency)
 ================================= */
 CREATE TABLE TermsConditions (
     terms_id   INT      IDENTITY(1,1) PRIMARY KEY,
@@ -112,7 +112,7 @@ CREATE TABLE Payments (
 
 /* ==============================
    7. REFUNDS
-   (booking_id NOT NULL — a refund must be tied to a booking)
+   (booking_id NOT NULL â€” a refund must be tied to a booking)
 ================================= */
 CREATE TABLE Refunds (
     refund_id     INT           IDENTITY(1,1) PRIMARY KEY,
@@ -147,7 +147,7 @@ CREATE TABLE Reviews (
 
 /* ==============================
    9. MESSAGES (CHAT)
-   sender_id and receiver_id are both FKs to Users — NOT PKs
+   sender_id and receiver_id are both FKs to Users â€” NOT PKs
 ================================= */
 CREATE TABLE Messages (
     message_id   INT          IDENTITY(1,1) PRIMARY KEY,
@@ -214,7 +214,7 @@ CREATE TABLE FoodPackages (
 
 /* ==============================
    13. FAQs
-   (venue_id FK added — venue-specific FAQs)
+   (venue_id FK added â€” venue-specific FAQs)
 ================================= */
 CREATE TABLE FAQs (
     faq_id     INT          IDENTITY(1,1) PRIMARY KEY,
@@ -231,7 +231,7 @@ CREATE TABLE FAQs (
 
 /* ==============================
    14. CANCELLED BOOKINGS
-   (ON DELETE SET NULL — booking may be soft-deleted)
+   (ON DELETE SET NULL â€” booking may be soft-deleted)
 ================================= */
 CREATE TABLE CancelledBookings (
     cancel_id     INT          IDENTITY(1,1) PRIMARY KEY,
@@ -260,64 +260,182 @@ CREATE INDEX idx_bookings_venue  ON Bookings(venue_id);
 CREATE INDEX idx_messages_sender ON Messages(sender_id);
 
 /* ============================================================
-   ADDITIONAL FUNCTIONALITIES FROM PROJECT PROPOSAL
+    FUNCTIONALITIES FROM PROJECT PROPOSAL
 ============================================================ */
-
-
-/* 29. IMAGE GALLERY FOR VENUE */
-
-SELECT image_url
-FROM VenueImages
-WHERE venue_id = 2;
-
-
-
-/* 30. SHOW FULL IMAGE GALLERY */
-
-SELECT V.venue_name, I.image_url
-FROM Venues V
-JOIN VenueImages I ON V.venue_id = I.venue_id
-WHERE V.venue_id = 2;
-
-
-
-/* 31. IN-PROGRESS EVENT TRACKING */
-
-SELECT B.booking_id, V.venue_name, B.event_date
-FROM Bookings B
-JOIN Venues V ON B.venue_id = V.venue_id
-WHERE B.booking_status = 'confirmed'
-AND B.event_date >= CURRENT_DATE;
-
-
-
-/* 32. AVAILABILITY CALENDAR (SHOW BOOKED DATES) */
-
-SELECT event_date
-FROM Bookings
-WHERE venue_id = 2
-AND booking_status = 'confirmed';
-
-
-
-/* 33. CHECK DATE AVAILABILITY BEFORE BOOKING */
-
-SELECT *
-FROM Bookings
-WHERE venue_id = 2
-AND event_date = '2026-12-20';
-
-
-
-/* 34. PAYMENT HISTORY FOR USER */
-
-SELECT P.payment_id, P.amount, P.payment_status, B.event_date
-FROM Payments P
-JOIN Bookings B ON P.booking_id = B.booking_id
-WHERE B.user_id = 1;
 /* ============================================================
-   ADDITIONAL FUNCTIONALITIES FROM PROJECT PROPOSAL
+   16. FUNCTIONAL QUERIES FOR WEBSITE FEATURES
 ============================================================ */
+
+/* 1. USER REGISTRATION */
+INSERT INTO Users (full_name, email, password_hash, phone, role)
+VALUES ('Ali Khan','ali@gmail.com','hashedpassword','03001234567','customer');
+
+
+/* 2. USER LOGIN */
+SELECT *
+FROM Users
+WHERE email = 'ali@gmail.com'
+AND password_hash = 'hashedpassword';
+
+
+/* 3. DISPLAY ALL VENUES (Homepage cards) */
+SELECT venue_id, venue_name, city, town, capacity, price_per_event
+FROM Venues;
+
+
+/* 4. SEARCH VENUE BY CITY */
+SELECT *
+FROM Venues
+WHERE city = 'Karachi';
+
+
+/* 5. FILTER VENUE BY PRICE RANGE */
+SELECT *
+FROM Venues
+WHERE price_per_event BETWEEN 200000 AND 500000;
+
+
+/* 6. FILTER VENUE BY CAPACITY */
+SELECT *
+FROM Venues
+WHERE capacity >= 500;
+
+
+/* 7. SORT VENUES BY PRICE (LOW TO HIGH) */
+SELECT *
+FROM Venues
+ORDER BY price_per_event ASC;
+
+
+/* 8. SORT VENUES BY PRICE (HIGH TO LOW) */
+SELECT *
+FROM Venues
+ORDER BY price_per_event DESC;
+
+
+/* 9. SORT VENUES BY BEST RATING */
+SELECT V.venue_id, V.venue_name, AVG(R.rating) AS average_rating
+FROM Venues V
+JOIN Reviews R ON V.venue_id = R.venue_id
+GROUP BY V.venue_id, V.venue_name
+ORDER BY average_rating DESC;
+
+
+/* 10. CHECK VENUE AVAILABILITY */
+SELECT *
+FROM Bookings
+WHERE venue_id = 1
+AND event_date = '2026-12-15';
+
+
+/* 11. CREATE BOOKING */
+INSERT INTO Bookings (user_id, venue_id, terms_id, event_date, booking_status, advance_paid)
+VALUES (1, 2, 1, '2026-12-15', 'pending', 50000);
+
+
+/* 12. VIEW USER BOOKINGS */
+SELECT B.booking_id, V.venue_name, B.event_date, B.booking_status
+FROM Bookings B
+JOIN Venues V ON B.venue_id = V.venue_id
+WHERE B.user_id = 1;
+
+
+/* 13. CONFIRM BOOKING (ADMIN / OWNER) */
+UPDATE Bookings
+SET booking_status = 'confirmed'
+WHERE booking_id = 1;
+
+
+/* 14. CANCEL BOOKING */
+UPDATE Bookings
+SET booking_status = 'cancelled'
+WHERE booking_id = 1;
+
+
+/* 15. INSERT INTO CANCELLED BOOKINGS TABLE */
+INSERT INTO CancelledBookings (booking_id, cancelled_by, cancel_reason)
+VALUES (1, 1, 'Event postponed');
+
+
+/* 16. MAKE PAYMENT */
+INSERT INTO Payments (booking_id, amount, payment_method, payment_status)
+VALUES (1, 50000, 'Credit Card', 'paid');
+
+
+/* 17. REQUEST REFUND */
+INSERT INTO Refunds (booking_id, refund_amount, reason)
+VALUES (1, 50000, 'Booking cancelled');
+
+
+/* 18. ADD REVIEW */
+INSERT INTO Reviews (user_id, venue_id, rating, comment)
+VALUES (1, 2, 5, 'Amazing venue and great service');
+
+
+/* 19. VIEW REVIEWS OF A VENUE */
+SELECT U.full_name, R.rating, R.comment
+FROM Reviews R
+JOIN Users U ON R.user_id = U.user_id
+WHERE R.venue_id = 2;
+
+
+/* 20. SEND MESSAGE (CHAT SYSTEM) */
+INSERT INTO Messages (sender_id, receiver_id, message_text)
+VALUES (1, 2, 'Is the venue available in December?');
+
+
+/* 21. VIEW CHAT BETWEEN TWO USERS */
+SELECT *
+FROM Messages
+WHERE sender_id = 1 AND receiver_id = 2
+OR sender_id = 2 AND receiver_id = 1
+ORDER BY sent_at;
+
+
+/* 22. VIEW VENUE DECORATION OPTIONS */
+SELECT *
+FROM Decorations
+WHERE venue_id = 2;
+
+
+/* 23. VIEW FOOD PACKAGES */
+SELECT *
+FROM FoodPackages
+WHERE venue_id = 2;
+
+
+/* 24. VIEW FAQs FOR A VENUE */
+SELECT question, answer
+FROM FAQs
+WHERE venue_id = 2;
+
+
+/* 25. CREATE SUPPORT TICKET */
+INSERT INTO SupportTickets (user_id, subject, message)
+VALUES (1, 'Payment Issue', 'My payment was deducted but booking not confirmed');
+
+
+/* 26. ADMIN VIEW ALL BOOKINGS */
+SELECT B.booking_id, U.full_name, V.venue_name, B.event_date, B.booking_status
+FROM Bookings B
+JOIN Users U ON B.user_id = U.user_id
+JOIN Venues V ON B.venue_id = V.venue_id;
+
+
+/* 27. ANALYTICS: MOST BOOKED VENUES */
+SELECT V.venue_name, COUNT(B.booking_id) AS total_bookings
+FROM Venues V
+JOIN Bookings B ON V.venue_id = B.venue_id
+GROUP BY V.venue_name
+ORDER BY total_bookings DESC;
+
+
+/* 28. MONTHLY BOOKING STATISTICS */
+SELECT MONTH(event_date) AS month, COUNT(*) AS bookings
+FROM Bookings
+GROUP BY MONTH(event_date)
+ORDER BY month;
+
 
 
 /* 29. IMAGE GALLERY FOR VENUE */
@@ -371,4 +489,5 @@ SELECT P.payment_id, P.amount, P.payment_status, B.event_date
 FROM Payments P
 JOIN Bookings B ON P.booking_id = B.booking_id
 WHERE B.user_id = 1;
+
 
