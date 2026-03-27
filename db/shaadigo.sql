@@ -183,6 +183,7 @@ CREATE INDEX idx_bookings_venue ON bookings(venue_id);
 CREATE INDEX idx_messages_sender ON messages(sender_id);
 
 --VIEWS
+GO
 
 CREATE VIEW vw_venue_details AS
 SELECT v.venue_id, v.venue_name, v.city,
@@ -190,12 +191,15 @@ SELECT v.venue_id, v.venue_name, v.city,
 FROM venues v
 LEFT JOIN reviews r ON v.venue_id = r.venue_id
 GROUP BY v.venue_id, v.venue_name, v.city;
+GO
+
 
 CREATE VIEW vw_booking_details AS
 SELECT b.booking_id, u.full_name, v.venue_name, b.event_date, b.booking_status
 FROM bookings b
 JOIN users u ON b.user_id = u.user_id
 JOIN venues v ON b.venue_id = v.venue_id;
+GO
 
 CREATE VIEW vw_payment_history AS
 SELECT p.payment_id, u.full_name, v.venue_name, p.amount, p.payment_status
@@ -203,6 +207,7 @@ FROM payments p
 JOIN bookings b ON p.booking_id = b.booking_id
 JOIN users u ON b.user_id = u.user_id
 JOIN venues v ON b.venue_id = v.venue_id;
+GO
 
 --STORED PROCEDURES
 GO
