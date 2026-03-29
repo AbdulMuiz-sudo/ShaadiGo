@@ -10,3 +10,13 @@
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Node dependencies (monorepo)
+**/node_modules/
+
+# Frontend production build output
+shaadigo-frontend/build/
+
+# Local env files
+**/.env
+**/.env.*
