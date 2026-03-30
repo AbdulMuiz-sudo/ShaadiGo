@@ -1,0 +1,93 @@
+/* Venue Card */
+.venue-card {
+  background: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.venue-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.venue-image-wrapper {
+  position: relative;
+  height: 180px;
+  overflow: hidden;
+}
+
+.venue-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.venue-card:hover .venue-image {
+  transform: scale(1.05);
+}
+
+.tour-badge {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  background: #DC2626;
+  color: #ffffff;
+  padding: 5px 12px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.venue-info {
+  padding: 18px;
+}
+
+.venue-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 5px;
+}
+
+.venue-location {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 12px;
+}
+
+.venue-details {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 0.85rem;
+  color: #555;
+  margin-bottom: 12px;
+}
+
+.venue-capacity,
+.venue-price {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.venue-rating {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.rating-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #D4AF37;
+  color: #7F1D1D;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
