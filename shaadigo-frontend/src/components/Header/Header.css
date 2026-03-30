@@ -1,13 +1,15 @@
 /* General Reset & Variables */
 :root {
-  --primary-color: #f39c12;
-  /* Solar Orange */
-  --secondary-color: #2c3e50;
-  /* Dark Blue/Gray */
+  --primary-maroon: #7F1D1D;
+  --secondary-maroon: #991B1B;
+  --accent-gold: #D4AF37;
+  --bright-gold: #FACC15;
+  --cta-red: #DC2626;
+  --bg-cream: #FEF2F2;
   --text-white: #ffffff;
+  --text-dark: #1a1a1a;
   --transition: all 0.3s ease;
-  --header-height: 80px;
-  /* Reference for consistency */
+  --header-height: 70px;
 }
 
 .header {
@@ -16,15 +18,9 @@
   top: 0;
   left: 0;
   z-index: 1000;
-  background: transparent;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  transition: background 0.3s ease, color 0.3s ease;
-}
-
-/* Header turns dark on hover or when scrolling (if you add logic later) */
-.header:hover {
-  background: #222;
-  color: white;
+  background: var(--primary-maroon);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+  transition: background 0.3s ease;
 }
 
 .container {
@@ -41,53 +37,98 @@
   height: var(--header-height);
 }
 
-.branding-sectionheader {
-  margin-bottom: 5px;
+/* Logo Styling */
+.logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  font-size: 1.5rem;
+  font-weight: 800;
 }
 
-.header-logo-img {
-  width: 140px;
-  /* Adjust size as needed */
-  height: auto;
-  filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.1));
+.logo-shaadi {
+  color: var(--text-white);
+  letter-spacing: 2px;
 }
 
-/* Better visibility on dark hover */
+.logo-go {
+  color: var(--accent-gold);
+  margin-left: 5px;
+  letter-spacing: 2px;
+}
 
 /* Nav Links */
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 30px;
+  gap: 25px;
   height: 100%;
-  /* Important for dropdown hover area */
 }
 
-.nav-links a {
+.nav-link {
   text-decoration: none;
-  color: white;
+  color: var(--text-white);
+  font-weight: 500;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: var(--transition);
+  padding: 8px 0;
+  position: relative;
+}
+
+.nav-link:hover {
+  color: var(--accent-gold);
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--accent-gold);
+  transition: width 0.3s ease;
+}
+
+.nav-link:hover::after {
+  width: 100%;
+}
+
+/* List Your Venue Button */
+.btn-list-venue {
+  background: var(--accent-gold);
+  color: var(--primary-maroon);
+  padding: 10px 20px;
+  border-radius: 6px;
   font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: var(--transition);
+  border: 2px solid var(--accent-gold);
+}
+
+.btn-list-venue:hover {
+  background: transparent;
+  color: var(--accent-gold);
+}
+
+/* Header Icons */
+.header-icons {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.header-icon {
+  font-size: 1.3rem;
+  color: var(--text-white);
   cursor: pointer;
   transition: var(--transition);
 }
 
-.nav-links a:hover {
-  color: var(--primary-color);
-}
-
-/* Social Icons */
-.social-icons {
-  display: flex;
-  gap: 15px;
-  margin-left: 20px;
-  border-left: 1px solid rgba(255, 255, 255, 0.2);
-  padding-left: 20px;
-}
-
-.social-icon {
-  font-size: 1.2rem;
-  color: white;
-  transition: var(--transition);
+.header-icon:hover {
+  color: var(--accent-gold);
 }
 
 /* --- MEGA MENU LOGIC --- */
@@ -97,95 +138,6 @@
   width: 100%;
 }
 
-/* Dropdown trigger */
-.dropdown {
-  position: static;
-  /* Required for full-width child */
-  display: flex;
-  align-items: center;
-  height: 100%;
-  /* No gap between top of nav and bottom */
-  cursor: pointer;
-}
-
-/* The actual Mega Menu */
-.dropdown-mega-menu {
-  display: none;
-  position: absolute;
-  top: var(--header-height);
-  /* Starts exactly at 80px */
-  left: 0;
-  right: 0;
-  background-color: #222;
-  z-index: 1000;
-  border-top: 1px solid #333;
-  /* Bridge: This invisible area prevents closing when moving mouse down */
-  padding-top: 2px;
-  min-width: 1200px;
-
-}
-
-/* Show menu when hovering over the container OR the menu itself */
-.dropdown:hover .dropdown-mega-menu {
-  display: flex;
-  animation: fadeIn 0.3s ease-out;
-}
-
-/* Dropdown Content Interior */
-.headerpage-container {
-  display: flex;
-  justify-content: center;
-  gap: 120px;
-  padding: 60px 0;
-  max-width: 2000px;
-  width: 100%;
-}
-
-.headerpage-content {
-  text-align: center;
-  width: 300px;
-}
-
-.headerpage-content .image-container img {
-  height: 150px;
-  width: auto;
-  object-fit: contain;
-  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.headerpage-content:hover img {
-  transform: scale(1.1);
-}
-
-.headerpage-content h3 {
-  color: #ffffff;
-  font-size: 1.1rem;
-  letter-spacing: 3px;
-  margin: 25px 0;
-  text-transform: uppercase;
-  font-weight: 300;
-}
-
-.link-group {
-  display: flex;
-  gap: 30px;
-  justify-content: center;
-}
-
-.link-group a {
-  color: #777 !important;
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-decoration: none;
-  border-bottom: 2px solid transparent;
-  padding-bottom: 5px;
-}
-
-.link-group a:hover {
-  color: #ffffff !important;
-  border-bottom: 2px solid var(--primary-color);
-}
-
 /* Mobile Toggle */
 .menu-toggle {
   display: none;
@@ -193,6 +145,7 @@
   justify-content: space-between;
   width: 30px;
   height: 21px;
+  cursor: pointer;
 }
 
 .menu-toggle span {
@@ -200,17 +153,19 @@
   width: 100%;
   background-color: white;
   border-radius: 3px;
+  transition: var(--transition);
 }
 
-.user-profile {
-  display: flex;
-  align-items: center;
-  gap: 25px;
-  font-weight: bolder;
-  font-size: 2rem;
-  margin-bottom: 5px;
-  margin-left: 50px;
-  color: #ffffff;
+.menu-toggle.active span:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+
+.menu-toggle.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.menu-toggle.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(7px, -6px);
 }
 
 @keyframes fadeIn {
@@ -218,7 +173,6 @@
     opacity: 0;
     transform: translateY(15px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
@@ -237,85 +191,74 @@
     right: -100%;
     width: 80%;
     height: 100vh;
-    background-color: #111;
+    background-color: var(--primary-maroon);
     flex-direction: column;
     padding-top: 100px;
     transition: 0.4s ease;
+    gap: 20px;
   }
 
   .nav-links-active {
     right: 0;
   }
 
-  .dropdown-mega-menu {
-    position: relative;
-    top: 0;
-    display: none;
-    background-color: #222;
-  }
-
-  .dropdown:hover .dropdown-mega-menu {
-    display: block;
-  }
-
-  .headerpage-container {
-    flex-direction: column;
-    align-items: center;
-    gap: 50px;
-    padding: 30px 0;
+  .btn-list-venue {
+    margin-top: 20px;
   }
 }
 
 .user-menu-container {
   position: relative;
-  /* This keeps the menu anchored to the icon */
   display: inline-block;
 }
 
 .user-profile-icon {
-  font-size: 2rem;
-  color: #fff;
+  font-size: 1.8rem;
+  color: var(--text-white);
   cursor: pointer;
-  transition: transform 0.2s;
+  transition: transform 0.2s, color 0.2s;
 }
 
 .user-profile-icon:hover {
   transform: scale(1.1);
+  color: var(--accent-gold);
 }
 
 .dropdown-menu {
   position: absolute;
-  top: 50px;
-  /* Adjust based on your navbar height */
+  top: 45px;
   right: 0;
-  background-color: #1a1a1a;
-  border: 1px solid #333;
+  background-color: white;
+  border: 1px solid #e5e5e5;
   border-radius: 8px;
   width: 180px;
-  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.5);
+  box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.15);
   z-index: 1000;
   overflow: hidden;
+  animation: fadeIn 0.2s ease-out;
 }
 
 .menu-item {
+  display: block;
   padding: 12px 16px;
-  color: white;
+  color: var(--text-dark);
   cursor: pointer;
   font-size: 0.9rem;
-  transition: background 0.3s;
+  transition: background 0.2s;
+  text-decoration: none;
 }
 
 .menu-item:hover {
-  background-color: #333;
-  color: #ccc014;
+  background-color: var(--bg-cream);
+  color: var(--primary-maroon);
 }
 
 .menu-item.logout {
-  border-top: 1px solid #333;
-  color: #ff4d4d;
+  border-top: 1px solid #e5e5e5;
+  color: var(--cta-red);
 }
 
 .menu-item.logout:hover {
-  background-color: #ff4d4d;
+  background-color: var(--cta-red);
   color: white;
 }
