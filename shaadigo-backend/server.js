@@ -1,9 +1,10 @@
 const express = require('express');
 const cors = require('cors');
 const sql = require('mssql');
+require('dotenv').config();
 
 const app = express();
-const PORT = 5000;
+const PORT = Number(process.env.PORT) || 5000;
 
 // 1. MIDDLEWARE
 app.use(cors());
@@ -11,18 +12,19 @@ app.use(express.json());
 
 // 2. MSSQL CONFIGURATION
 const dbConfig = {
-    user: 'sa',
-    password: '123456',
-    database: 'shaadigodb',
-    server: 'localhost',
+    user: process.env.DB_USER || 'sa',
+    password: process.env.DB_PASSWORD || '123456',
+    database: process.env.DB_NAME || 'shaadigo_db',
+    server: process.env.DB_SERVER || 'localhost',
+    port: Number(process.env.DB_PORT) || 1433,
     pool: {
         max: 10,
         min: 0,
         idleTimeoutMillis: 30000
     },
     options: {
-        encrypt: true, // Use true for Azure
-        trustServerCertificate: true // Change to false for production
+        encrypt: process.env.DB_ENCRYPT === 'true',
+        trustServerCertificate: process.env.DB_TRUST_CERT !== 'false'
     }
 };
 
@@ -30,7 +32,7 @@ const dbConfig = {
 const poolPromise = new sql.ConnectionPool(dbConfig)
     .connect()
     .then(pool => {
-        console.log('✅ Connected to MSSQL: shaadigo');
+        console.log(`✅ Connected to MSSQL: ${dbConfig.database}`);
         return pool;
     })
     .catch(err => console.log('❌ Database Connection Failed! Bad Config: ', err));
@@ -42,12 +44,16 @@ const ADMIN_PASSWORD = "abcd";
 
 // LOGIN
 app.post('/api/login', async (req, res) => {
-    const { forename, password } = req.body;
+    const { email, password } = req.body;
 
-    if (forename === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+    if (!email || !password) {
+        return res.status(400).json({ message: 'Email and password are required.' });
+    }
+
+    if (email === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
         return res.status(200).json({
             message: "Admin login successful",
-            user: { forename: "Admin", role: "admin" },
+            user: { fullName: "Admin", email: ADMIN_USERNAME, role: "admin", id: 0 },
             token: "mock-admin-token-123"
         });
     }
@@ -55,16 +61,25 @@ app.post('/api/login', async (req, res) => {
     try {
         const pool = await poolPromise;
         const result = await pool.request()
-            .input('forename', sql.VarChar, forename)
+            .input('email', sql.VarChar, email)
             .input('password', sql.VarChar, password)
-            .query('SELECT id, forename, surname FROM Users WHERE forename = @forename AND password = @password');
+            .query(`
+                SELECT user_id, full_name, email, role
+                FROM users
+                WHERE email = @email AND password_hash = @password
+            `);
 
         const user = result.recordset[0];
 
         if (user) {
             return res.status(200).json({
                 message: "User login successful",
-                user: { forename: user.forename, surname: user.surname, role: "user", id: user.id },
+                user: {
+                    id: user.user_id,
+                    fullName: user.full_name,
+                    email: user.email,
+                    role: user.role || "customer"
+                },
                 token: "mock-user-token-456"
             });
         }
@@ -76,14 +91,31 @@ app.post('/api/login', async (req, res) => {
 
 // REGISTER
 app.post('/api/register', async (req, res) => {
-    const { forename, surname, password } = req.body;
+    const { fullName, email, password, phone } = req.body;
+
+    if (!fullName || !email || !password) {
+        return res.status(400).json({ message: 'Full name, email, and password are required.' });
+    }
+
     try {
         const pool = await poolPromise;
+        const existingUser = await pool.request()
+            .input('email', sql.VarChar, email)
+            .query('SELECT user_id FROM users WHERE email = @email');
+
+        if (existingUser.recordset.length > 0) {
+            return res.status(409).json({ message: 'An account with this email already exists.' });
+        }
+
         await pool.request()
-            .input('forename', sql.VarChar, forename)
-            .input('surname', sql.VarChar, surname)
+            .input('fullName', sql.VarChar, fullName)
+            .input('email', sql.VarChar, email)
             .input('password', sql.VarChar, password)
-            .query('INSERT INTO Users (forename, surname, password, role) VALUES (@forename, @surname, @password, \'user\')');
+            .input('phone', sql.VarChar, phone || null)
+            .query(`
+                INSERT INTO users (full_name, email, password_hash, phone, role)
+                VALUES (@fullName, @email, @password, @phone, 'customer')
+            `);
 
         res.status(201).json({ message: "Profile created successfully" });
     } catch (err) {

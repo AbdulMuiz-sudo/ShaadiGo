@@ -8,8 +8,9 @@ const Login = () => {
     const navigate = useNavigate();
     const [isLogin, setIsLogin] = useState(true);
     const [formData, setFormData] = useState({
-        forename: '', // The input name remains 'forename' in state as requested
-        surname: '',
+        fullName: '',
+        email: '',
+        phone: '',
         password: ''
     });
 
@@ -24,9 +25,17 @@ const Login = () => {
         // It's up to your backend to handle 'forename' as 'email/phone'
         const BASE_URL = "http://localhost:5000/api";
         const endpoint = isLogin ? `${BASE_URL}/login` : `${BASE_URL}/register`;
+        const payload = isLogin
+            ? { email: formData.email, password: formData.password }
+            : {
+                fullName: formData.fullName,
+                email: formData.email,
+                phone: formData.phone,
+                password: formData.password
+            };
 
         try {
-            const response = await axios.post(endpoint, formData);
+            const response = await axios.post(endpoint, payload);
 
             if (response.status === 200 || response.status === 201) {
                 const data = response.data;
@@ -57,7 +66,7 @@ const Login = () => {
     const handleToggle = () => {
         setIsLogin(!isLogin);
         // Reset form data on toggle if desired
-        setFormData({ forename: '', surname: '', password: '' });
+        setFormData({ fullName: '', email: '', phone: '', password: '' });
     };
 
     return (
@@ -92,30 +101,41 @@ const Login = () => {
 
                     {/* Form Fields Section */}
                     <div className="fields-section">
-                        {/* Primary Input (Email/Phone) */}
+                        {!isLogin && (
+                            <div className="input-group-premium">
+                                <label className="premium-label">Full Name</label>
+                                <input
+                                    type="text"
+                                    name="fullName"
+                                    placeholder="Enter your full name"
+                                    value={formData.fullName}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div>
+                        )}
+
                         <div className="input-group-premium">
-                            <label className="premium-label">{isLogin ? "Email or Phone" : "Forename / Username"}</label>
+                            <label className="premium-label">Email</label>
                             <input
-                                type="text"
-                                name="forename" // Keep state name 'forename'
-                                placeholder={isLogin ? "Enter email or phone number" : "Enter username"}
-                                value={formData.forename}
+                                type="email"
+                                name="email"
+                                placeholder="Enter email address"
+                                value={formData.email}
                                 onChange={handleChange}
                                 required
                             />
                         </div>
 
-                        {/* Surname Input (Only shows for Register) */}
                         {!isLogin && (
                             <div className="input-group-premium">
-                                <label className="premium-label">Surname</label>
+                                <label className="premium-label">Phone (Optional)</label>
                                 <input
-                                    type="text"
-                                    name="surname"
-                                    placeholder="Enter surname"
-                                    value={formData.surname}
+                                    type="tel"
+                                    name="phone"
+                                    placeholder="Enter phone number"
+                                    value={formData.phone}
                                     onChange={handleChange}
-                                    required
                                 />
                             </div>
                         )}
@@ -137,7 +157,7 @@ const Login = () => {
                     {/* Forgot Password Link (Only shows for Login) */}
                     {isLogin && (
                         <div className="forgot-password-link">
-                            <a href="#">Forgot Password?</a>
+                            <a href="javascript:void(0)">Forgot Password?</a>
                         </div>
                     )}
 
