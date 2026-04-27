@@ -1,0 +1,25 @@
+/* Tagline.css */
+.tagline {
+  max-width: 300px;
+  animation: fadeLeft 0.6s ease both;
+}
+
+.tagline h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.8rem;
+  line-height: 1.15;
+  color: var(--maroon);
+  margin-bottom: 14px;
+}
+
+.tagline h2 em {
+  font-style: italic;
+  color: var(--gold);
+}
+
+.tagline p {
+  font-size: 0.88rem;
+  line-height: 1.7;
+  color: var(--maroon);
+  opacity: 0.6;
+}

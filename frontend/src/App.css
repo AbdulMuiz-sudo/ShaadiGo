@@ -1,0 +1,62 @@
+/* App.css - Global styles only! */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Dancing+Script:wght@700&family=Inter:wght@400;500;600&display=swap');
+
+:root {
+  --bg: #FFE0D1;
+  --gold: #D4AF37;
+  --gold-light: rgba(212,175,55,0.18);
+  --maroon: #4D0D0D;
+  --card: rgba(255,255,255,0.60);
+  --card-border: rgba(212,175,55,0.45);
+  --input-bg: rgba(255,255,255,0.80);
+}
+
+*, *::before, *::after { 
+  box-sizing: border-box; 
+  margin: 0; 
+  padding: 0; 
+}
+
+body {
+  min-height: 100vh;
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(ellipse at 15% 20%, rgba(212,175,55,0.13) 0%, transparent 55%),
+    radial-gradient(ellipse at 85% 80%, rgba(77,13,13,0.07) 0%, transparent 50%);
+  font-family: 'Inter', sans-serif;
+  color: var(--maroon);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Homepage main only — scoped to .App so it doesn't affect other pages */
+.App main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 20px;
+  gap: 64px;
+}
+
+.divider-v {
+  width: 1.5px;
+  height: 200px;
+  background: linear-gradient(to bottom, transparent, var(--gold), transparent);
+  flex-shrink: 0;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeLeft {
+  from { opacity: 0; transform: translateX(-20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@media (max-width: 700px) {
+  .tagline, .divider-v { display: none; }
+  .App main { padding: 24px 16px; }
+}

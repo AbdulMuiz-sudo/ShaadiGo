@@ -1,0 +1,68 @@
+/* Footer.css */
+footer {
+  border-top: 1.5px solid var(--gold);
+  background: rgba(255,224,209,0.92);
+  padding: 40px 48px 24px;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr;
+  gap: 32px;
+  margin-bottom: 32px;
+}
+
+.footer-brand .brand-foot {
+  font-family: 'Dancing Script', cursive;
+  font-size: 1.8rem;
+  color: var(--maroon);
+  display: block;
+  margin-bottom: 10px;
+}
+
+.footer-brand p {
+  font-size: 0.82rem;
+  line-height: 1.65;
+  color: var(--maroon);
+  opacity: 0.55;
+  max-width: 220px;
+}
+
+.footer-col h4 {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 14px;
+}
+
+.footer-col a {
+  display: block;
+  font-size: 0.83rem;
+  color: var(--maroon);
+  text-decoration: none;
+  opacity: 0.6;
+  margin-bottom: 9px;
+  transition: opacity 0.2s;
+}
+.footer-col a:hover { opacity: 1; }
+
+.footer-bottom {
+  border-top: 1px solid rgba(212,175,55,0.3);
+  padding-top: 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footer-bottom p {
+  font-size: 0.75rem;
+  color: var(--maroon);
+  opacity: 0.4;
+}
+
+@media (max-width: 700px) {
+  footer { padding: 28px 24px 20px; }
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+}
