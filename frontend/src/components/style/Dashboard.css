@@ -1,0 +1,545 @@
+:root {
+    --bg: #FFE0D1;
+    --gold: #D4AF37;
+    --gold-light: rgba(212, 175, 55, 0.18);
+    --maroon: #4D0D0D;
+    --card: rgba(255, 255, 255, 0.62);
+    --card-border: rgba(212, 175, 55, 0.45);
+}
+
+.db-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--bg);
+    background-image:
+        radial-gradient(ellipse at 10% 15%, rgba(212, 175, 55, 0.13) 0%, transparent 55%),
+        radial-gradient(ellipse at 90% 85%, rgba(77, 13, 13, 0.07) 0%, transparent 50%);
+    font-family: 'Inter', sans-serif;
+    color: var(--maroon);
+}
+
+.db-main {
+    flex: 1;
+    padding: 36px 48px 56px;
+    max-width: 1000px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* Heading */
+.db-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 6px;
+}
+
+.db-heading h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.4rem;
+    font-weight: 700;
+    line-height: 1.1;
+}
+
+.db-heading p {
+    font-size: 0.85rem;
+    opacity: 0.55;
+    margin-top: 5px;
+}
+
+.db-gold-divider {
+    width: 52px;
+    height: 2px;
+    background: var(--gold);
+    border-radius: 2px;
+    margin: 10px 0 28px;
+}
+
+/* New Booking Button */
+.db-btn-new {
+    background: var(--maroon);
+    color: #FFE0D1;
+    border: none;
+    border-radius: 9px;
+    padding: 10px 20px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: background 0.2s;
+    white-space: nowrap;
+}
+
+.db-btn-new:hover {
+    background: #6b1111;
+}
+
+/* Summary Grid */
+.db-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+}
+
+.db-summary-card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    padding: 20px 16px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+}
+
+.db-summary-icon {
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+}
+
+.db-summary-val {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--maroon);
+}
+
+.db-summary-label {
+    font-size: 0.72rem;
+    opacity: 0.5;
+    margin-top: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Filter Tabs */
+.db-filter-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.db-tab {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: 8px;
+    padding: 7px 14px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.82rem;
+    color: var(--maroon);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.db-tab:hover {
+    border-color: var(--gold);
+    background: var(--gold-light);
+}
+
+.db-tab.active {
+    background: var(--maroon);
+    color: #FFE0D1;
+    border-color: var(--maroon);
+}
+
+.db-tab.active .db-tab-count {
+    background: rgba(255, 255, 255, 0.2);
+    color: #FFE0D1;
+}
+
+.db-tab-count {
+    background: rgba(77, 13, 13, 0.1);
+    border-radius: 10px;
+    padding: 1px 7px;
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+
+/* Booking Cards */
+.db-cards-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.db-card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    transition: box-shadow 0.2s;
+}
+
+.db-card:hover {
+    box-shadow: 0 4px 20px rgba(77, 13, 13, 0.08);
+}
+
+.db-card.cancelled {
+    opacity: 0.7;
+}
+
+/* Card Header */
+.db-card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 20px 22px 16px;
+}
+
+.db-card-emoji {
+    font-size: 2rem;
+    width: 52px;
+    height: 52px;
+    background: rgba(212, 175, 55, 0.12);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.db-card-info {
+    flex: 1;
+}
+
+.db-card-venue {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.db-card-location {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.76rem;
+    opacity: 0.5;
+    margin-top: 3px;
+}
+
+.db-card-ref {
+    font-size: 0.68rem;
+    opacity: 0.35;
+    margin-top: 4px;
+    letter-spacing: 0.5px;
+}
+
+.db-card-right {
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.db-card-date {
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-top: 6px;
+}
+
+.db-card-event-type {
+    font-size: 0.7rem;
+    opacity: 0.45;
+    margin-top: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Status Badge */
+.db-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.3px;
+}
+
+.db-status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+}
+
+/* Stats Row */
+.db-card-stats {
+    display: flex;
+    align-items: center;
+    padding: 12px 22px;
+    border-top: 1px solid rgba(212, 175, 55, 0.18);
+    border-bottom: 1px solid rgba(212, 175, 55, 0.18);
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.db-stat {
+    flex: 1;
+    text-align: center;
+}
+
+.db-stat-label {
+    display: block;
+    font-size: 0.65rem;
+    opacity: 0.45;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.db-stat-val {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    margin-top: 2px;
+}
+
+.db-stat-divider {
+    width: 1px;
+    height: 28px;
+    background: rgba(212, 175, 55, 0.25);
+    flex-shrink: 0;
+}
+
+/* Expanded Details */
+.db-card-details {
+    padding: 14px 22px;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.db-detail-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.08);
+}
+
+.db-detail-row:last-child {
+    border-bottom: none;
+}
+
+.db-detail-label {
+    opacity: 0.5;
+}
+
+.db-detail-val {
+    font-weight: 500;
+}
+
+/* Action Buttons */
+.db-card-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 22px;
+    gap: 8px;
+}
+
+.db-btn {
+    border-radius: 7px;
+    padding: 7px 14px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+}
+
+.db-btn-ghost {
+    background: transparent;
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    color: var(--maroon);
+    opacity: 0.6;
+}
+
+.db-btn-ghost:hover {
+    opacity: 1;
+    border-color: var(--gold);
+}
+
+.db-btn-cancel {
+    background: rgba(155, 35, 53, 0.1);
+    color: #9b2335;
+    border: 1px solid rgba(155, 35, 53, 0.25);
+}
+
+.db-btn-cancel:hover {
+    background: rgba(155, 35, 53, 0.18);
+}
+
+.db-btn-cancel:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.db-btn-pay {
+    background: rgba(26, 127, 75, 0.1);
+    color: #1a7f4b;
+    border: 1px solid rgba(26, 127, 75, 0.25);
+}
+
+.db-btn-pay:hover {
+    background: rgba(26, 127, 75, 0.18);
+}
+
+.db-btn-chat {
+    background: var(--gold-light);
+    color: var(--maroon);
+    border: 1px solid rgba(212, 175, 55, 0.4);
+}
+
+.db-btn-chat:hover {
+    background: rgba(212, 175, 55, 0.28);
+}
+
+/* Empty State */
+.db-empty {
+    text-align: center;
+    padding: 60px 20px;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+}
+
+.db-empty-icon {
+    font-size: 3rem;
+    margin-bottom: 12px;
+}
+
+.db-empty-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+}
+
+.db-empty-sub {
+    font-size: 0.85rem;
+    opacity: 0.5;
+    margin: 6px 0 20px;
+}
+
+/* Status / Error */
+.db-status {
+    text-align: center;
+    padding: 40px;
+    opacity: 0.5;
+    font-size: 0.95rem;
+}
+
+.db-error {
+    color: #c0392b;
+    opacity: 1;
+}
+
+/* Responsive */
+@media (max-width: 700px) {
+    .db-main {
+        padding: 24px 16px 40px;
+    }
+
+    .db-summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .db-card-header {
+        flex-wrap: wrap;
+    }
+
+    .db-card-right {
+        width: 100%;
+        text-align: left;
+    }
+
+    .db-card-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+
+.db-btn-review {
+    background: linear-gradient(135deg, #D4AF37, #b8942e);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 7px 14px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.db-btn-review:hover {
+    opacity: 0.88;
+}
+
+.db-btn-reviewed {
+    font-size: 0.8rem;
+    color: #1a7f4b;
+    font-weight: 600;
+    padding: 7px 0;
+}
+
+/* IN-PROGRESS CARD BORDER */
+.db-card.inprogress {
+    border-left: 4px solid #9b59b6;
+}
+
+/* IN-PROGRESS BANNER */
+.db-inprogress-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, rgba(123, 63, 160, 0.08), rgba(155, 89, 182, 0.12));
+    border-bottom: 1px solid rgba(123, 63, 160, 0.15);
+    padding: 10px 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #7b3fa0;
+    border-radius: 12px 12px 0 0;
+}
+
+/* PULSING DOT */
+.db-inprogress-pulse {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #9b59b6;
+    display: inline-block;
+    flex-shrink: 0;
+    animation: pulse-ring 1.4s ease-in-out infinite;
+}
+
+@keyframes pulse-ring {
+    0% {
+        box-shadow: 0 0 0 0 rgba(155, 89, 182, 0.6);
+    }
+
+    70% {
+        box-shadow: 0 0 0 8px rgba(155, 89, 182, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(155, 89, 182, 0);
+    }
+}
+
+/* REFUND BANNER */
+.db-refund-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(26, 127, 75, 0.07);
+    border-bottom: 1px solid rgba(26, 127, 75, 0.18);
+    padding: 10px 20px;
+    font-size: 0.82rem;
+    color: #1a7f4b;
+}
+
+.db-refund-banner strong {
+    font-weight: 700;
+}

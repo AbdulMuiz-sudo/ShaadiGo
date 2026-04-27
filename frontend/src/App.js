@@ -12,8 +12,6 @@ import Contact from './components/Contact';
 import Dashboard from './components/Dashboard';
 import AboutUs from './components/AboutUs';
 import Chat from './components/Chat';
-// Add this import
-import MyBookings from './components/mybookings';
 import './App.css';
 
 // A layout wrapper so we don't have to copy-paste the header/footer on both pages
@@ -50,7 +48,6 @@ function App() {
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/chat" element={<Chat />} />
                 <Route path="/about" element={<AboutUs />} />
-                <Route path="/my-bookings" element={<MyBookings />} />
                 {/* Catch-all fallback */}
                 <Route path="*" element={<Navigate to="/login" />} />
             </Routes>

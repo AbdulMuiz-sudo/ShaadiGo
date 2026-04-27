@@ -30,7 +30,7 @@ function Chat() {
 
   useEffect(() => {
     if (!booking || !loggedInUser) {
-      navigate('/my-bookings');
+      navigate('/dashboard');
       return;
     }
     fetchMessages();
@@ -193,9 +193,9 @@ function Chat() {
       <Header />
       <main className="ch-main">
 
-        <button className="ch-back" onClick={() => navigate('/my-bookings')}>
+        <button className="ch-back" onClick={() => navigate('/dashboard')}>
           <FiArrowLeft style={{ marginRight: '6px' }} />
-          Back to Bookings
+          Back to Dashboard
         </button>
 
         <div className="ch-layout">
@@ -214,7 +214,7 @@ function Chat() {
             <div className="ch-info-row">
               <span>Status</span>
               <strong className={`ch-status ch-status--${bookingStatus}`}>
-                {bookingStatus.charAt(0).toUpperCase() + bookingStatus.slice(1)}
+                {bookingStatus === 'pending' ? 'In Progress' : bookingStatus.charAt(0).toUpperCase() + bookingStatus.slice(1)}
               </strong>
             </div>
             <div className="ch-info-divider"></div>
@@ -231,7 +231,8 @@ function Chat() {
                 </div>
                 <div className="ch-payment-amount">
                   PKR {Number(booking.advance_paid || 0).toLocaleString('en-IN')}
-                  <span>advance paid</span>
+                  {/* FIX: Smart label updates based on status */}
+                  <span>{bookingStatus === 'pending' ? 'advance due' : 'advance paid'}</span>
                 </div>
                 <button
                   className="ch-payment-btn"

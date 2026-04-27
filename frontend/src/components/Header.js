@@ -52,9 +52,9 @@ function Header() {
 
                         {dropdownOpen && (
                             <div className="user-dropdown-menu">
-                                <div className="dropdown-item" onClick={() => { navigate('/my-bookings'); setDropdownOpen(false); }}>
+                                <div className="dropdown-item" onClick={() => { navigate('/dashboard'); setDropdownOpen(false); }}>
                                     <FaCalendarAlt className="dropdown-icon" />
-                                    My Bookings
+                                    My Dashboard
                                 </div>
                                 <div className="dropdown-divider"></div>
                                 <div className="dropdown-item logout-item" onClick={handleLogout}>
