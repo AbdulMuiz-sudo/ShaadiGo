@@ -2,66 +2,64 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from './Header';
 import Footer from './Footer';
-import '../style/Venueselection.css';
+import { FaLandmark, FaTree, FaGem, FaStar, FaStarHalfAlt, FaRegStar } from 'react-icons/fa';
+import { FiMapPin, FiUsers, FiSearch, FiFilter, FiX } from 'react-icons/fi';
+import './style/Venueselection.css';
 
 const cityFilters = ['All', 'Lahore', 'Karachi', 'Islamabad'];
 
-// Decorative clipart banners per venue
+// Decorative icon banners per venue (replaced emojis with react-icons)
 const venueBanners = {
-  1: { bg: 'linear-gradient(135deg,#f5e6c8 0%,#ede0b0 100%)', art: '🏛️', label: 'Grand Hall' },
-  2: { bg: 'linear-gradient(135deg,#e8f5e9 0%,#c8e6c9 100%)', art: '✨', label: 'Garden Estate' },
-  3: { bg: 'linear-gradient(135deg,#fce4ec 0%,#f8bbd0 100%)', art: '🌸', label: 'Majestic Hall' },
-  4: { bg: 'linear-gradient(135deg,#fff8e1 0%,#ffecb3 100%)', art: '🌹', label: 'Marquee' },
-  5: { bg: 'linear-gradient(135deg,#e8eaf6 0%,#c5cae9 100%)', art: '🕌', label: 'Grand Hall' },
-  6: { bg: 'linear-gradient(135deg,#e0f7fa 0%,#b2ebf2 100%)', art: '🏰', label: 'Garden Venue' },
+  1: { bg: 'linear-gradient(135deg,#f5e6c8 0%,#ede0b0 100%)', Icon: FaLandmark, label: 'Grand Hall' },
+  2: { bg: 'linear-gradient(135deg,#e8f5e9 0%,#c8e6c9 100%)', Icon: FaTree, label: 'Garden Estate' },
+  3: { bg: 'linear-gradient(135deg,#fce4ec 0%,#f8bbd0 100%)', Icon: FaGem, label: 'Majestic Hall' },
+  4: { bg: 'linear-gradient(135deg,#fff8e1 0%,#ffecb3 100%)', Icon: FaLandmark, label: 'Marquee' },
+  5: { bg: 'linear-gradient(135deg,#e8eaf6 0%,#c5cae9 100%)', Icon: FaLandmark, label: 'Grand Hall' },
+  6: { bg: 'linear-gradient(135deg,#e0f7fa 0%,#b2ebf2 100%)', Icon: FaTree, label: 'Garden Venue' },
 };
 
 function VenueBanner({ venue }) {
   const id = venue.venue_id;
-  const banner = venueBanners[id] || { bg: 'linear-gradient(135deg,#f5e6c8,#ede0b0)', art: '🏛️', label: 'Venue' };
+  const banner = venueBanners[id] || { bg: 'linear-gradient(135deg,#f5e6c8,#ede0b0)', Icon: FaLandmark, label: 'Venue' };
+  const BannerIcon = banner.Icon;
 
   return (
     <div className="vs-banner" style={{ background: banner.bg }}>
       {/* Decorative circles */}
       <div className="vs-banner-circle vs-banner-circle--1" />
       <div className="vs-banner-circle vs-banner-circle--2" />
+
       {/* Bunting flags */}
       <div className="vs-bunting">
-        {['#D4AF37','#4D0D0D','#D4AF37','#4D0D0D','#D4AF37','#4D0D0D','#D4AF37'].map((c, i) => (
+        {['#D4AF37', '#4D0D0D', '#D4AF37', '#4D0D0D', '#D4AF37', '#4D0D0D', '#D4AF37'].map((c, i) => (
           <div key={i} className="vs-flag" style={{ background: c }} />
         ))}
       </div>
-      {/* Main emoji */}
-      <div className="vs-banner-emoji">{banner.art}</div>
-      {/* Small decorative flowers */}
-      <span className="vs-deco vs-deco--tl">🌿</span>
-      <span className="vs-deco vs-deco--tr">🌿</span>
-      <span className="vs-deco vs-deco--bl">✦</span>
-      <span className="vs-deco vs-deco--br">✦</span>
+
+      {/* Main Icon instead of emoji */}
+      <div className="vs-banner-emoji" style={{ color: '#4D0D0D', opacity: 0.8 }}>
+        <BannerIcon size={42} />
+      </div>
+
       {/* Label ribbon */}
       <div className="vs-banner-label">{banner.label}</div>
     </div>
   );
 }
 
+// React-icons based Star Rating
 function StarRating({ rating }) {
-  return (
-    <div className="vs-stars-icons">
-      {[1, 2, 3, 4, 5].map(i => {
-        const fill = rating >= i ? 1 : rating >= i - 0.5 ? 0.5 : 0;
-        return <StarIcon key={i} fill={fill} />;
-      })}
-    </div>
-  );
-}
-
-function StarIcon({ fill }) {
-  const color = fill === 1 ? '#D4AF37' : fill === 0.5 ? 'url(#halfGold)' : 'rgba(212,175,55,0.25)';
-  return (
-    <svg viewBox="0 0 16 16" style={{ fill: color, width: 14, height: 14 }}>
-      <polygon points="8,1 10,6 15,6 11,9.5 12.5,15 8,12 3.5,15 5,9.5 1,6 6,6" />
-    </svg>
-  );
+  const stars = [];
+  for (let i = 1; i <= 5; i++) {
+    if (rating >= i) {
+      stars.push(<FaStar key={i} color="#D4AF37" />);
+    } else if (rating >= i - 0.5) {
+      stars.push(<FaStarHalfAlt key={i} color="#D4AF37" />);
+    } else {
+      stars.push(<FaRegStar key={i} color="rgba(212,175,55,0.3)" />);
+    }
+  }
+  return <div className="vs-stars-icons" style={{ display: 'flex', gap: '2px', fontSize: '0.9rem' }}>{stars}</div>;
 }
 
 function formatPrice(num) {
@@ -69,15 +67,15 @@ function formatPrice(num) {
 }
 
 function VenueSelection() {
-  const [venues, setVenues]           = useState([]);
-  const [loading, setLoading]         = useState(true);
-  const [error, setError]             = useState(null);
-  const [activeCity, setActiveCity]   = useState('All');
-  const [searchText, setSearchText]   = useState('');
+  const [venues, setVenues] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [activeCity, setActiveCity] = useState('All');
+  const [searchText, setSearchText] = useState('');
   const [showFilters, setShowFilters] = useState(false);
-  const [minPrice, setMinPrice]       = useState('');
-  const [maxPrice, setMaxPrice]       = useState('');
-  const [filterCity, setFilterCity]   = useState('');
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
+  const [filterCity, setFilterCity] = useState('');
   const navigate = useNavigate();
 
   const fetchVenues = useCallback(async () => {
@@ -85,16 +83,19 @@ function VenueSelection() {
     setError(null);
     try {
       const params = new URLSearchParams();
-      if (searchText)               params.append('search',   searchText);
-      if (activeCity !== 'All')     params.append('city',     activeCity);
-      else if (filterCity)          params.append('city',     filterCity);
-      if (minPrice)                 params.append('minPrice', minPrice);
-      if (maxPrice)                 params.append('maxPrice', maxPrice);
+      if (searchText) params.append('search', searchText);
+      if (activeCity !== 'All') params.append('city', activeCity);
+      else if (filterCity) params.append('city', filterCity);
+      if (minPrice) params.append('minPrice', minPrice);
+      if (maxPrice) params.append('maxPrice', maxPrice);
 
-      const res  = await fetch(`http://localhost:5001/api/venues/search?${params}`);
+      const res = await fetch(`http://localhost:5001/api/venues/search?${params}`);
       const data = await res.json();
-      if (data.success) setVenues(data.venues);
-      else setError(data.message);
+      if (data.success) {
+        setVenues(data.venues);
+      } else {
+        setError(data.message);
+      }
     } catch {
       setError('Could not connect to server.');
     } finally {
@@ -123,15 +124,6 @@ function VenueSelection() {
 
   return (
     <div className="vs-page">
-      <svg width="0" height="0" style={{ position: 'absolute' }}>
-        <defs>
-          <linearGradient id="halfGold" x1="0" x2="1" y1="0" y2="0">
-            <stop offset="50%" stopColor="#D4AF37" />
-            <stop offset="50%" stopColor="rgba(212,175,55,0.25)" />
-          </linearGradient>
-        </defs>
-      </svg>
-
       <Header />
 
       <main className="vs-main">
@@ -144,28 +136,27 @@ function VenueSelection() {
         {/* SEARCH ROW */}
         <div className="vs-search-row">
           <div className="vs-search-box">
-            <svg viewBox="0 0 20 20" fill="none" width="16" height="16">
-              <circle cx="9" cy="9" r="6" stroke="#4D0D0D" strokeWidth="1.6" />
-              <path d="M13.5 13.5L17 17" stroke="#4D0D0D" strokeWidth="1.6" strokeLinecap="round" />
-            </svg>
+            <FiSearch size={18} color="#4D0D0D" style={{ marginLeft: '14px', opacity: 0.6 }} />
             <input
               className="vs-search-input"
               type="text"
               placeholder="Search by name or location…"
               value={searchText}
               onChange={e => setSearchText(e.target.value)}
+              style={{ paddingLeft: '10px' }}
             />
             {searchText && (
-              <button className="vs-search-clear" onClick={() => setSearchText('')}>✕</button>
+              <button className="vs-search-clear" onClick={() => setSearchText('')}>
+                <FiX size={16} />
+              </button>
             )}
           </div>
           <button
             className={`vs-filter-toggle${showFilters ? ' active' : ''}`}
             onClick={() => setShowFilters(p => !p)}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
           >
-            <svg viewBox="0 0 20 20" fill="none" width="15" height="15">
-              <path d="M3 5h14M6 10h8M9 15h2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-            </svg>
+            <FiFilter size={16} />
             Filters {hasActiveFilters && <span className="vs-filter-dot" />}
           </button>
         </div>
@@ -219,55 +210,58 @@ function VenueSelection() {
         )}
 
         {loading && <div className="vs-status">Loading venues…</div>}
-        {error   && <div className="vs-status vs-error">{error}</div>}
+        {error && <div className="vs-status vs-error">{error}</div>}
 
         {/* VENUE CARDS */}
         {!loading && !error && (
           <div className="vs-grid">
-            {venues.map((venue, i) => (
-              <div className="vs-card" key={venue.venue_id} style={{ animationDelay: `${i * 0.08}s` }}>
+            {venues.map((venue, i) => {
+              // Safety variables to map the correct DB Columns
+              const safeName = venue.venue_name || venue.name;
+              const safeRating = Number(venue.avg_rating || venue.rating || 0);
+              const safeReviews = venue.review_count || 0;
 
-                <VenueBanner venue={venue} />
+              return (
+                <div className="vs-card" key={venue.venue_id} style={{ animationDelay: `${i * 0.08}s` }}>
 
-                <div className="vs-body">
-                  <div className="vs-top">
-                    <div className="vs-name">{venue.name}</div>
-                    <div className="vs-badge">{venue.city}</div>
-                  </div>
-                  <div className="vs-stars">
-                    <StarRating rating={venue.rating} />
-                    <span className="vs-rating-val">{venue.rating}</span>
-                    <span className="vs-rating-count">({venue.review_count} reviews)</span>
-                  </div>
-                  <p className="vs-desc">{venue.description}</p>
-                  <div className="vs-meta">
-                    <div className="vs-meta-item">
-                      <svg viewBox="0 0 16 16" fill="none" width="13" height="13">
-                        <path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5S12.5 9.5 12.5 6C12.5 3.5 10.5 1.5 8 1.5Z" stroke="#4D0D0D" strokeWidth="1.3" />
-                        <circle cx="8" cy="6" r="1.5" stroke="#4D0D0D" strokeWidth="1.3" />
-                      </svg>
-                      {venue.location}
+                  <VenueBanner venue={venue} />
+
+                  <div className="vs-body">
+                    <div className="vs-top">
+                      <div className="vs-name">{safeName}</div>
+                      <div className="vs-badge">{venue.city}</div>
                     </div>
-                    <div className="vs-meta-item">
-                      <svg viewBox="0 0 16 16" fill="none" width="13" height="13">
-                        <path d="M2 5h12M2 8h8M5 2v2M11 2v2" stroke="#4D0D0D" strokeWidth="1.3" strokeLinecap="round" />
-                        <rect x="2" y="3" width="12" height="10" rx="1.5" stroke="#4D0D0D" strokeWidth="1.3" />
-                      </svg>
-                      Up to {venue.capacity.toLocaleString()} guests
+                    <div className="vs-stars">
+                      <StarRating rating={safeRating} />
+                      <span className="vs-rating-val">{safeRating > 0 ? safeRating.toFixed(1) : 'New'}</span>
+                      <span className="vs-rating-count">({safeReviews} reviews)</span>
                     </div>
-                  </div>
-                  <div className="vs-footer">
-                    <div className="vs-price">
-                      PKR {formatPrice(venue.price_per_event)} <span>/ event</span>
+                    <p className="vs-desc">{venue.description}</p>
+
+                    <div className="vs-meta">
+                      <div className="vs-meta-item" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <FiMapPin size={14} color="#4D0D0D" />
+                        {venue.location}
+                      </div>
+                      <div className="vs-meta-item" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <FiUsers size={14} color="#4D0D0D" />
+                        Up to {venue.capacity.toLocaleString()} guests
+                      </div>
                     </div>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      <button className="vs-btn-detail" onClick={() => navigate('/venue-detail', { state: { venue } })}>View Detail</button>
-                      <button className="vs-btn-book" onClick={() => navigate('/booking', { state: { venue } })}>Book Now</button>
+
+                    <div className="vs-footer">
+                      <div className="vs-price">
+                        PKR {formatPrice(venue.price_per_event)} <span>/ event</span>
+                      </div>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button className="vs-btn-detail" onClick={() => navigate('/venue-detail', { state: { venue } })}>View Detail</button>
+                        <button className="vs-btn-book" onClick={() => navigate('/booking', { state: { venue } })}>Book Now</button>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </main>

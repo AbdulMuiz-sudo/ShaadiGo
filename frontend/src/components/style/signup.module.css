@@ -1,0 +1,294 @@
+:root {
+  --maroon: #5B1B1B;
+  --gold: #D4AF37;
+  --gold-light: rgba(212, 175, 55, 0.3);
+  --card: rgba(255, 255, 255, 0.85);
+  --card-border: rgba(212, 175, 55, 0.2);
+  --input-bg: #FFFFFF;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  padding: 40px 44px;
+  width: 100%;
+  max-width: 460px;
+  /* Slightly wider for the two-column name row */
+  backdrop-filter: blur(12px);
+  animation: fadeUp 0.55s ease both;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05);
+}
+
+/* Hide the Merit Swipe badge to keep the ShaadiGo UI clean */
+.badge {
+  display: none;
+}
+
+.heading {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--maroon);
+  line-height: 1.1;
+  margin-bottom: 8px;
+}
+
+.subtext {
+  font-size: 0.85rem;
+  color: var(--maroon);
+  opacity: 0.6;
+  margin-bottom: 28px;
+  line-height: 1.4;
+}
+
+.row {
+  display: flex;
+  gap: 16px;
+}
+
+.fieldGroup {
+  margin-bottom: 20px;
+  flex: 1;
+}
+
+.label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--maroon);
+  opacity: 0.7;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.inputWrap {
+  position: relative;
+}
+
+.inputIcon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: var(--maroon);
+  opacity: 0.35;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+}
+
+.input {
+  width: 100%;
+  padding: 11px 14px 11px 40px;
+  border: 1px solid rgba(212, 175, 55, 0.5);
+  border-radius: 8px;
+  background: var(--input-bg);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  color: var(--maroon);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+}
+
+.input::placeholder {
+  color: var(--maroon);
+  opacity: 0.3;
+}
+
+.input:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px var(--gold-light);
+}
+
+.input.hasError {
+  border-color: #d93025;
+}
+
+.eyeBtn {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--maroon);
+  opacity: 0.4;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 0;
+}
+
+.eyeBtn:hover {
+  opacity: 0.8;
+}
+
+.errorMsg {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #d93025;
+  font-size: 0.75rem;
+  margin-top: 6px;
+}
+
+.termsRow {
+  display: flex;
+  align-items: center;
+  margin: 10px 0 24px;
+}
+
+.termsLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  color: var(--maroon);
+  opacity: 0.7;
+  cursor: pointer;
+  margin: 0;
+}
+
+.termsCheckbox {
+  accent-color: var(--maroon);
+  width: 14px;
+  height: 14px;
+}
+
+.termsLink {
+  color: var(--maroon);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: var(--gold);
+}
+
+.submitBtn {
+  width: 100%;
+  padding: 12px;
+  background: var(--maroon);
+  color: #FFE0D1;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.22s, transform 0.15s;
+}
+
+.submitBtn:hover {
+  background: #451313;
+}
+
+.submitBtn:active {
+  transform: scale(0.98);
+}
+
+.submitBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.footer {
+  margin-top: 24px;
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--maroon);
+  opacity: 0.6;
+}
+
+.switchBtn {
+  background: none;
+  border: none;
+  color: var(--maroon);
+  font-weight: 700;
+  opacity: 1;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  margin-left: 6px;
+  font-size: 0.82rem;
+}
+
+/* Password Strength Meter */
+.strengthWrap {
+  margin-top: 10px;
+}
+
+.strengthBarRow {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.strengthSegment {
+  flex: 1;
+  height: 4px;
+  background: rgba(212, 175, 55, 0.2);
+  border-radius: 2px;
+  transition: background 0.3s;
+}
+
+.strengthSegment.filled {
+  background: var(--strength-color);
+}
+
+.strengthMeta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+}
+
+.strengthLabel {
+  color: var(--strength-color);
+  font-weight: 600;
+}
+
+.strengthTips {
+  color: var(--maroon);
+  opacity: 0.6;
+}
+
+.successToast {
+  background: rgba(46, 125, 50, 0.1);
+  border: 1px solid #2e7d32;
+  color: #2e7d32;
+  padding: 12px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 700px) {
+  .card {
+    padding: 32px 24px;
+  }
+
+  .row {
+    flex-direction: column;
+    gap: 0;
+  }
+}

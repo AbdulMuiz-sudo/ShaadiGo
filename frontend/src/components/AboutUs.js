@@ -2,7 +2,9 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from './Header';
 import Footer from './Footer';
-import '../style/AboutUs.css';
+import { FaLandmark } from 'react-icons/fa';
+import { FiCalendar, FiMessageCircle, FiCheckCircle, FiClipboard, FiLock } from 'react-icons/fi';
+import './style/AboutUs.css';
 
 function AboutUs() {
     const navigate = useNavigate();
@@ -65,11 +67,11 @@ function AboutUs() {
 
                 {/* What We Offer */}
                 <div className="ab-features">
-                    <div className="ab-section-label" style={{textAlign:'center'}}>What We Offer</div>
-                    <h2 className="ab-section-title" style={{textAlign:'center'}}>Everything You Need, In One Place</h2>
+                    <div className="ab-section-label" style={{ textAlign: 'center' }}>What We Offer</div>
+                    <h2 className="ab-section-title" style={{ textAlign: 'center' }}>Everything You Need, In One Place</h2>
                     <div className="ab-features-grid">
                         <div className="ab-feature-card">
-                            <div className="ab-feature-icon">🏛️</div>
+                            <div className="ab-feature-icon"><FaLandmark /></div>
                             <div className="ab-feature-title">Premium Venues</div>
                             <p className="ab-feature-text">
                                 Handpicked wedding halls and marquees across Lahore, Karachi, and Islamabad —
@@ -77,7 +79,7 @@ function AboutUs() {
                             </p>
                         </div>
                         <div className="ab-feature-card">
-                            <div className="ab-feature-icon">📅</div>
+                            <div className="ab-feature-icon"><FiCalendar /></div>
                             <div className="ab-feature-title">Real-Time Availability</div>
                             <p className="ab-feature-text">
                                 Our live availability calendar shows you exactly which dates are open —
@@ -85,7 +87,7 @@ function AboutUs() {
                             </p>
                         </div>
                         <div className="ab-feature-card">
-                            <div className="ab-feature-icon">💬</div>
+                            <div className="ab-feature-icon"><FiMessageCircle /></div>
                             <div className="ab-feature-title">Direct Owner Chat</div>
                             <p className="ab-feature-text">
                                 Communicate directly with venue owners to negotiate, ask questions,
@@ -93,7 +95,7 @@ function AboutUs() {
                             </p>
                         </div>
                         <div className="ab-feature-card">
-                            <div className="ab-feature-icon">✅</div>
+                            <div className="ab-feature-icon"><FiCheckCircle /></div>
                             <div className="ab-feature-title">Instant Confirmation</div>
                             <p className="ab-feature-text">
                                 Book your venue in minutes and receive instant confirmation —
@@ -101,7 +103,7 @@ function AboutUs() {
                             </p>
                         </div>
                         <div className="ab-feature-card">
-                            <div className="ab-feature-icon">📋</div>
+                            <div className="ab-feature-icon"><FiClipboard /></div>
                             <div className="ab-feature-title">Booking Dashboard</div>
                             <p className="ab-feature-text">
                                 Manage all your bookings from a personalized dashboard —
@@ -109,7 +111,7 @@ function AboutUs() {
                             </p>
                         </div>
                         <div className="ab-feature-card">
-                            <div className="ab-feature-icon">🔒</div>
+                            <div className="ab-feature-icon"><FiLock /></div>
                             <div className="ab-feature-title">Secure & Reliable</div>
                             <p className="ab-feature-text">
                                 Your bookings and personal information are protected with

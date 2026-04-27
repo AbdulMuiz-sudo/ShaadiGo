@@ -1,0 +1,168 @@
+.bookings-page {
+    background: #fdf8f8;
+    min-height: 100vh;
+}
+
+.bookings-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 120px 24px 60px;
+}
+
+.bookings-header {
+    text-align: center;
+    margin-bottom: 48px;
+}
+
+.bookings-header h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.8rem;
+    color: var(--maroon);
+}
+
+.bookings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 24px;
+}
+
+.booking-card {
+    background: white;
+    border: 1px solid rgba(77, 13, 13, 0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.booking-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.05);
+}
+
+.booking-card-header {
+    padding: 16px 20px;
+    background: #fafafa;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.status-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 20px;
+}
+
+.status-confirmed {
+    background: #e6f4ea;
+    color: #1e7e34;
+}
+
+.status-pending {
+    background: #fff4e5;
+    color: #b7791f;
+}
+
+.status-cancelled {
+    background: #fce8e8;
+    color: #c53030;
+}
+
+.booking-body {
+    padding: 20px;
+}
+
+.booking-body h3 {
+    color: var(--maroon);
+    margin-bottom: 16px;
+    font-size: 1.25rem;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #666;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+.payment-summary {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px dashed #ddd;
+}
+
+.payment-row {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 600;
+    color: var(--maroon);
+}
+
+.booking-actions {
+    padding: 16px 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.btn-chat,
+.btn-details {
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: background 0.2s;
+}
+
+.btn-chat {
+    background: #f3f3f3;
+    color: #444;
+}
+
+.btn-details {
+    background: var(--maroon);
+    color: white;
+}
+
+.no-bookings {
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--maroon);
+    opacity: 0.7;
+}
+
+.explore-btn {
+    margin-top: 20px;
+    padding: 12px 24px;
+    background: var(--maroon);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.spinner {
+    animation: spin 1s linear infinite;
+    font-size: 2rem;
+    color: var(--maroon);
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}

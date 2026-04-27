@@ -2,102 +2,96 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Header from './Header';
 import Footer from './Footer';
-import '../style/Venuedetail.css';
-
-const CATEGORIES = ['all', 'hall', 'outdoor', 'decor', 'food', 'suite'];
-const CAT_LABELS = { all:'All', hall:'Hall', outdoor:'Outdoor', decor:'Décor', food:'Catering', suite:'Suites' };
-const catCounts = { all:18, hall:5, outdoor:4, decor:4, food:3, suite:2 };
-
-const galleryData = [
-  { idx:0,  emoji:'🏛️', caption:'Grand Banquet Hall — Main Floor',      cat:'hall',    h:'xl' },
-  { idx:1,  emoji:'🌿', caption:'Lush Garden Lawn — Ceremony Area',     cat:'outdoor', h:'md' },
-  { idx:2,  emoji:'🌸', caption:'Bridal Stage Floral Arrangement',      cat:'decor',   h:'lg' },
-  { idx:3,  emoji:'💎', caption:'Bridal Suite — Premium Dressing Room', cat:'suite',   h:'sm' },
-  { idx:4,  emoji:'✨', caption:'Crystal Chandelier — Imported Italian', cat:'hall',   h:'md' },
-  { idx:5,  emoji:'🍽️', caption:'Catering Spread — 120 Dish Buffet',  cat:'food',    h:'lg' },
-  { idx:6,  emoji:'🌙', caption:'Evening Facade — Illuminated Entry',   cat:'outdoor', h:'xl' },
-  { idx:7,  emoji:'🕯️', caption:'Candlelit Table Settings',            cat:'decor',   h:'sm' },
-  { idx:8,  emoji:'🎭', caption:'Stage and Dance Floor Area',           cat:'hall',    h:'md' },
-  { idx:9,  emoji:'🌺', caption:'Rooftop Terrace Lounge',              cat:'outdoor', h:'lg' },
-  { idx:10, emoji:'🧁', caption:'Custom Wedding Cake Display',          cat:'food',    h:'sm' },
-  { idx:11, emoji:'🪞', caption:"Groom's Preparation Room",             cat:'suite',   h:'md' },
-  { idx:12, emoji:'🌹', caption:'Rose Petal Aisle Walkway',             cat:'decor',   h:'lg' },
-  { idx:13, emoji:'🏺', caption:'VIP Lounge — Entrance Foyer',         cat:'hall',    h:'sm' },
-  { idx:14, emoji:'⛲', caption:'Fountain & Water Feature',             cat:'outdoor', h:'md' },
-  { idx:15, emoji:'☕', caption:'High Tea & Chai Station',              cat:'food',    h:'lg' },
-  { idx:16, emoji:'🎆', caption:'Evening Lighting — Full Setup',        cat:'hall',    h:'xl' },
-  { idx:17, emoji:'🦋', caption:'Butterfly & Fairy Light Ceiling',      cat:'decor',   h:'md' },
-];
-
-const amenities = [
-  { icon:'🅿️', name:'Ample Parking',       desc:'Covered & open parking for 300+ vehicles with dedicated valet service.' },
-  { icon:'❄️', name:'Central AC & Heating', desc:'Climate-controlled throughout all indoor spaces for year-round comfort.' },
-  { icon:'🎵', name:'Sound & AV System',    desc:'Professional surround sound, LED screens, and live performance stage setup.' },
-  { icon:'🍽️', name:'In-house Catering',   desc:'120-dish menu options with dedicated chefs. Halal certified kitchen.' },
-  { icon:'💐', name:'Décor Services',       desc:'Full floral, lighting, and stage decoration by our in-house design team.' },
-  { icon:'📸', name:'Photography Spaces',   desc:'Designated backdrops, gardens, and studio-lit areas for photography.' },
-  { icon:'🛗', name:'Accessibility',        desc:'Elevator access, ramps, and dedicated accessible restrooms on all floors.' },
-  { icon:'🔒', name:'Security & CCTV',      desc:'24/7 on-site security team, CCTV coverage, and private event management.' },
-];
+import { FiArrowLeft, FiX, FiChevronLeft, FiChevronRight, FiImage } from 'react-icons/fi';
+import { FaMapMarkerAlt, FaUsers, FaStar, FaPlayCircle, FaCameraRetro } from 'react-icons/fa';
+import { MdOutlineFastfood, MdCelebration, MdInfoOutline } from 'react-icons/md';
+import './style/Venuedetail.css';
 
 function VenueDetail() {
   const location = useLocation();
   const navigate = useNavigate();
   const venue = location.state?.venue;
 
-  // ALL hooks must be declared before any early return
-  const [activeCat, setActiveCat] = useState('all');
+  // State for fetched DB data
+  const [images, setImages] = useState([]);
+  const [foodPackages, setFoodPackages] = useState([]);
+  const [decorations, setDecorations] = useState([]);
+  const [loadingDb, setLoadingDb] = useState(true);
+
+  // Lightbox state
   const [lbOpen, setLbOpen] = useState(false);
   const [lbIdx, setLbIdx] = useState(0);
 
+  // 1. If no venue is passed, boot them back to the search page
   useEffect(() => {
     if (!venue) navigate('/venues');
   }, [venue, navigate]);
 
-  const visible = galleryData.filter(g => activeCat === 'all' || g.cat === activeCat);
+  // 2. Fetch the nested venue data (images, food, decor) from our backend
+  useEffect(() => {
+    if (!venue?.venue_id) return;
 
+    const fetchVenueData = async () => {
+      try {
+        const response = await fetch(`http://localhost:5001/api/venues/${venue.venue_id}`);
+        const data = await response.json();
+
+        if (data.success) {
+          setImages(data.images || []);
+          setFoodPackages(data.foodPackages || []);
+          setDecorations(data.decorations || []);
+        }
+      } catch (err) {
+        console.error("Failed to fetch venue details:", err);
+      } finally {
+        setLoadingDb(false);
+      }
+    };
+
+    fetchVenueData();
+  }, [venue]);
+
+  // 3. Lightbox keyboard navigation
   useEffect(() => {
     const handler = (e) => {
-      if (!lbOpen) return;
+      if (!lbOpen || images.length === 0) return;
       if (e.key === 'Escape') setLbOpen(false);
-      if (e.key === 'ArrowLeft') setLbIdx(i => (i - 1 + visible.length) % visible.length);
-      if (e.key === 'ArrowRight') setLbIdx(i => (i + 1) % visible.length);
+      if (e.key === 'ArrowLeft') setLbIdx(i => (i - 1 + images.length) % images.length);
+      if (e.key === 'ArrowRight') setLbIdx(i => (i + 1) % images.length);
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [lbOpen, visible.length]);
+  }, [lbOpen, images.length]);
 
-  // Early return AFTER all hooks
   if (!venue) return null;
 
+  // --- SAFETY NET FOR DB SCHEMA ---
+  const safeName = venue.venue_name || venue.name || "Venue Details";
+  const safeCapacity = venue.capacity || 0;
+  const safeRating = venue.avg_rating || venue.rating || 0;
+  const safePrice = venue.price_per_event || venue.price || 0;
+  const safeReviews = venue.review_count || venue.reviews || 0;
+  const safeCity = venue.city || "City";
+  const safeLocation = venue.location || "Location";
+
   const openLb = (idx) => { setLbIdx(idx); setLbOpen(true); };
-  const current = visible[lbIdx] || visible[0];
+  const currentImg = images[lbIdx] || '';
 
   return (
     <div className="vd-page">
-
       {/* LIGHTBOX */}
-      {lbOpen && (
+      {lbOpen && images.length > 0 && (
         <div className="vd-lb" onClick={() => setLbOpen(false)}>
           <div className="vd-lb-wrap" onClick={e => e.stopPropagation()}>
-            <div className={`vd-lb-img vd-bg-${current?.cat}`}>{current?.emoji}</div>
-            <button className="vd-lb-close" onClick={() => setLbOpen(false)}>✕</button>
+            <img src={currentImg} alt="Enlarged venue view" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+            <button className="vd-lb-close" onClick={() => setLbOpen(false)}><FiX size={24} /></button>
           </div>
           <div className="vd-lb-bottom">
-            <button className="vd-lb-arrow" onClick={() => setLbIdx(i => (i - 1 + visible.length) % visible.length)}>←</button>
+            <button className="vd-lb-arrow" onClick={(e) => { e.stopPropagation(); setLbIdx(i => (i - 1 + images.length) % images.length); }}><FiChevronLeft size={24} /></button>
             <div className="vd-lb-info">
-              <div className="vd-lb-caption">{current?.caption}</div>
-              <div className="vd-lb-counter">{lbIdx + 1} / {visible.length}</div>
+              <div className="vd-lb-counter">{lbIdx + 1} / {images.length}</div>
             </div>
-            <button className="vd-lb-arrow" onClick={() => setLbIdx(i => (i + 1) % visible.length)}>→</button>
-          </div>
-          <div className="vd-lb-thumbs">
-            {visible.map((g, i) => (
-              <div key={g.idx} className={`vd-lb-thumb vd-bg-${g.cat}${i === lbIdx ? ' active' : ''}`}
-                onClick={e => { e.stopPropagation(); setLbIdx(i); }}>
-                {g.emoji}
-              </div>
-            ))}
+            <button className="vd-lb-arrow" onClick={(e) => { e.stopPropagation(); setLbIdx(i => (i + 1) % images.length); }}><FiChevronRight size={24} /></button>
           </div>
         </div>
       )}
@@ -106,28 +100,25 @@ function VenueDetail() {
 
       {/* HERO */}
       <div className="vd-hero">
-        <button className="vd-back" onClick={() => navigate('/venues')}>
-          <svg viewBox="0 0 14 14" fill="none" width="13" height="13">
-            <path d="M9 2L4 7l5 5" stroke="#4D0D0D" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-          Back to Venues
+        <button className="vd-back" onClick={() => navigate('/venues')} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <FiArrowLeft /> Back to Venues
         </button>
 
         <div className="vd-meta-strip">
           <div className="vd-meta-left">
-            <h1>{venue.name.split(' ').slice(0,-1).join(' ')} <em>{venue.name.split(' ').slice(-1)}</em></h1>
+            <h1>{safeName.split(' ').slice(0, -1).join(' ')} <em>{safeName.split(' ').slice(-1)}</em></h1>
             <div className="vd-pills">
-              <span className="vd-badge">{venue.city}</span>
+              <span className="vd-badge">{safeCity}</span>
               <span className="vd-pill-sep"></span>
-              <span className="vd-pill">📍 {venue.location}</span>
+              <span className="vd-pill" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><FaMapMarkerAlt /> {safeLocation}</span>
               <span className="vd-pill-sep"></span>
-              <span className="vd-pill">👥 Up to {venue.capacity.toLocaleString()} guests</span>
+              <span className="vd-pill" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><FaUsers /> Up to {safeCapacity.toLocaleString()} guests</span>
               <span className="vd-pill-sep"></span>
-              <span className="vd-pill">⭐ {venue.rating} ({venue.reviews} reviews)</span>
+              <span className="vd-pill" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><FaStar color="#D4AF37" /> {safeRating} ({safeReviews} reviews)</span>
             </div>
           </div>
           <div className="vd-meta-right">
-            <div className="vd-price">PKR {venue.price} <span>/ event</span></div>
+            <div className="vd-price">PKR {safePrice.toLocaleString()} <span>/ event</span></div>
             <button className="vd-btn-book" onClick={() => navigate('/booking', { state: { venue } })}>
               Book This Venue
             </button>
@@ -135,22 +126,34 @@ function VenueDetail() {
         </div>
 
         <div className="vd-hero-grid">
-          <div className="vd-hero-main vd-bg-hall" onClick={() => { setActiveCat('all'); openLb(0); }}>
-            <div className="vd-hero-emoji">🏛️</div>
-            <div className="vd-photo-badge">📷 18 Photos</div>
-            <div className="vd-hover-overlay"><div className="vd-view-icon">👁 View</div></div>
+          <div className="vd-hero-main" onClick={() => images.length > 0 && openLb(0)} style={{ position: 'relative', overflow: 'hidden', cursor: images.length > 0 ? 'pointer' : 'default' }}>
+            {images.length > 0 ? (
+              <img src={images[0]} alt="Main Hall" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            ) : (
+              <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f5f5', color: '#ccc' }}><FiImage size={48} /></div>
+            )}
+            <div className="vd-photo-badge" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><FaCameraRetro /> {images.length} Photos</div>
           </div>
+
           <div className="vd-hero-right">
-            <div className="vd-hero-thumb vd-bg-decor" onClick={() => { setActiveCat('all'); openLb(2); }}>
-              <div className="vd-hero-emoji-sm">🌸</div>
-              <div className="vd-hover-overlay"><div className="vd-view-icon">👁</div></div>
+            <div className="vd-hero-thumb" onClick={() => images.length > 1 && openLb(1)} style={{ position: 'relative', overflow: 'hidden', cursor: images.length > 1 ? 'pointer' : 'default' }}>
+              {images.length > 1 ? (
+                <img src={images[1]} alt="Gallery 2" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : (
+                <div style={{ width: '100%', height: '100%', background: '#eee' }}></div>
+              )}
             </div>
-            <div className="vd-hero-thumb vd-bg-outdoor" onClick={() => { setActiveCat('all'); openLb(6); }}>
-              <div className="vd-hero-emoji-sm">🌿</div>
-              <div className="vd-hover-overlay"><div className="vd-view-icon">👁</div></div>
-              <button className="vd-show-all" onClick={e => { e.stopPropagation(); setActiveCat('all'); openLb(0); }}>
-                ⊞ Show all photos
-              </button>
+            <div className="vd-hero-thumb" onClick={() => images.length > 2 && openLb(2)} style={{ position: 'relative', overflow: 'hidden', cursor: images.length > 2 ? 'pointer' : 'default' }}>
+              {images.length > 2 ? (
+                <img src={images[2]} alt="Gallery 3" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : (
+                <div style={{ width: '100%', height: '100%', background: '#eaeaea' }}></div>
+              )}
+              {images.length > 0 && (
+                <button className="vd-show-all" onClick={e => { e.stopPropagation(); openLb(0); }}>
+                  ⊞ Show all photos
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -160,55 +163,77 @@ function VenueDetail() {
       <div className="vd-tour-banner">
         <div className="vd-tour-left">
           <h2>Take a <em>Virtual Tour</em></h2>
-          <p>Experience {venue.name} from the comfort of your home. Explore every corner in stunning 360° detail before you visit.</p>
+          <p>Experience {safeName} from the comfort of your home. Explore every corner in stunning 360° detail before you visit.</p>
           <div className="vd-tour-features">
-            {['360° panoramic view','HD high-resolution photos','All spaces covered','Day & evening shots'].map(f => (
+            {['360° panoramic view', 'HD high-resolution photos', 'All spaces covered', 'Day & evening shots'].map(f => (
               <div key={f} className="vd-tour-feat"><div className="vd-feat-dot"></div>{f}</div>
             ))}
           </div>
         </div>
-        <button className="vd-btn-tour">▶ Start Virtual Tour</button>
+        <button className="vd-btn-tour" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><FaPlayCircle size={18} /> Start Virtual Tour</button>
       </div>
 
       {/* GALLERY */}
       <div className="vd-gallery">
         <div className="vd-section-row">
           <div className="vd-section-heading">Media <em>Gallery</em></div>
-          <div className="vd-cat-tabs">
-            {CATEGORIES.map(cat => (
-              <button key={cat} className={`vd-cat-tab${activeCat === cat ? ' active' : ''}`}
-                onClick={() => { setActiveCat(cat); setLbIdx(0); }}>
-                {CAT_LABELS[cat]} <span className="vd-tab-count">{catCounts[cat]}</span>
-              </button>
+        </div>
+
+        {loadingDb ? (
+          <p>Loading images...</p>
+        ) : images.length === 0 ? (
+          <p style={{ opacity: 0.6, fontStyle: 'italic' }}>No images uploaded for this venue yet.</p>
+        ) : (
+          <div className="vd-masonry" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '16px' }}>
+            {images.map((url, i) => (
+              <div key={i} className="vd-gal-item" onClick={() => openLb(i)} style={{ height: '200px', borderRadius: '12px', overflow: 'hidden', cursor: 'pointer', position: 'relative' }}>
+                <img src={url} alt={`Gallery item ${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                <div className="vd-gal-overlay"><div className="vd-gal-caption">View Image</div></div>
+              </div>
             ))}
           </div>
-        </div>
-
-        <div className="vd-masonry">
-          {visible.map((g, i) => (
-            <div key={g.idx} className="vd-gal-item" onClick={() => openLb(i)}>
-              <div className={`vd-gal-ph vd-h-${g.h} vd-bg-${g.cat}`}>{g.emoji}</div>
-              <span className="vd-gal-tag">{CAT_LABELS[g.cat]}</span>
-              <div className="vd-gal-overlay"><div className="vd-gal-caption">{g.caption}</div></div>
-            </div>
-          ))}
-        </div>
+        )}
       </div>
 
-      {/* AMENITIES */}
+      {/* DB-DRIVEN SERVICES: FOOD & DECOR */}
       <div className="vd-amenities">
-        <div className="vd-section-row" style={{marginBottom:'18px'}}>
-          <div className="vd-section-heading">Venue <em>Amenities</em></div>
+        <div className="vd-section-row" style={{ marginBottom: '18px' }}>
+          <div className="vd-section-heading">Venue <em>Packages & Services</em></div>
         </div>
-        <div className="vd-amenities-grid">
-          {amenities.map(a => (
-            <div key={a.name} className="vd-amenity-card">
-              <div className="vd-amenity-icon">{a.icon}</div>
-              <div className="vd-amenity-name">{a.name}</div>
-              <div className="vd-amenity-desc">{a.desc}</div>
-            </div>
-          ))}
-        </div>
+
+        {loadingDb ? (
+          <p>Loading services...</p>
+        ) : (
+          <div className="vd-amenities-grid">
+
+            {/* Map Food Packages */}
+            {foodPackages.map(fp => (
+              <div key={fp.food_id} className="vd-amenity-card">
+                <div className="vd-amenity-icon"><MdOutlineFastfood size={28} color="#D4AF37" /></div>
+                <div className="vd-amenity-name">{fp.package_name}</div>
+                <div className="vd-amenity-desc" style={{ marginBottom: '8px' }}>{fp.description}</div>
+                <div style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#5B1B1B' }}>PKR {fp.price_per_person.toLocaleString()} / person</div>
+              </div>
+            ))}
+
+            {/* Map Decorations */}
+            {decorations.map(dec => (
+              <div key={dec.decoration_id} className="vd-amenity-card">
+                <div className="vd-amenity-icon"><MdCelebration size={28} color="#D4AF37" /></div>
+                <div className="vd-amenity-name">{dec.decoration_name}</div>
+                <div className="vd-amenity-desc" style={{ marginBottom: '8px' }}>{dec.description}</div>
+                <div style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#5B1B1B' }}>PKR {dec.price.toLocaleString()} flat rate</div>
+              </div>
+            ))}
+
+            {foodPackages.length === 0 && decorations.length === 0 && (
+              <div className="vd-amenity-card" style={{ gridColumn: '1 / -1', textAlign: 'center', opacity: 0.6 }}>
+                <MdInfoOutline size={32} style={{ margin: '0 auto 10px', display: 'block' }} />
+                Contact the venue owner for specific catering and decoration packages.
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       <Footer />

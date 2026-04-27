@@ -1,5 +1,5 @@
 import React from 'react';
-import '../style/Tagline.css';
+import './style/Tagline.css';
 
 function Tagline() {
     return (

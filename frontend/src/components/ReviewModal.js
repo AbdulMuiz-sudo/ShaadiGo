@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import '../style/ReviewModal.css';
+import './style/ReviewModal.css';
 
 function StarPicker({ value, onChange }) {
   const [hovered, setHovered] = useState(0);

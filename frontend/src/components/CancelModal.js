@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import '../style/CancelModal.css';
+import './style/CancelModal.css';
 
 function getRefundPolicy(daysUntil) {
-  if (daysUntil > 7)  return { percent: 90, label: 'More than 7 days away' };
+  if (daysUntil > 7) return { percent: 90, label: 'More than 7 days away' };
   if (daysUntil >= 5) return { percent: 80, label: '5–7 days away' };
   if (daysUntil >= 3) return { percent: 50, label: '3–5 days away' };
   if (daysUntil >= 1) return { percent: 30, label: '1–3 days away' };
@@ -11,34 +11,36 @@ function getRefundPolicy(daysUntil) {
 
 export default function CancelModal({ booking, onClose, onConfirmed }) {
   const [cancelling, setCancelling] = useState(false);
-  const [error, setError]           = useState('');
-  const loggedInUser = JSON.parse(localStorage.getItem('shaadigo_user') || 'null');
+  const [error, setError] = useState('');
 
-  const today    = new Date();
+  // FIX: Updated local storage key to 'user'
+  const loggedInUser = JSON.parse(localStorage.getItem('user') || 'null');
+
+  const today = new Date();
   today.setHours(0, 0, 0, 0);
   const eventDay = new Date(booking.event_date);
   eventDay.setHours(0, 0, 0, 0);
-  const daysUntil   = Math.ceil((eventDay - today) / (1000 * 60 * 60 * 24));
-  const policy      = getRefundPolicy(daysUntil);
-  const refundAmt   = parseFloat(((booking.advance_paid * policy.percent) / 100).toFixed(2));
+  const daysUntil = Math.ceil((eventDay - today) / (1000 * 60 * 60 * 24));
+  const policy = getRefundPolicy(daysUntil);
+  const refundAmt = parseFloat(((booking.advance_paid * policy.percent) / 100).toFixed(2));
 
   const handleCancel = async () => {
     setCancelling(true);
     setError('');
     try {
-      const res  = await fetch(`http://localhost:5001/api/booking/${booking.booking_id}/cancel`, {
-        method:  'PATCH',
+      const res = await fetch(`http://localhost:5001/api/booking/${booking.booking_id}/cancel`, {
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ userId: loggedInUser.user_id }),
+        body: JSON.stringify({ userId: loggedInUser.user_id }),
       });
       const data = await res.json();
       if (data.success) {
         onConfirmed({
           ...booking,
-          status:         'cancelled',
+          status: 'cancelled',
           refund_percent: data.refundPercent,
-          refund_amount:  data.refundAmount,
-          refund_status:  'pending',
+          refund_amount: data.refundAmount,
+          refund_status: 'pending',
         });
       } else {
         setError(data.message);
@@ -60,7 +62,7 @@ export default function CancelModal({ booking, onClose, onConfirmed }) {
           <div className="cm-title">Cancel Booking</div>
           <div className="cm-venue">{booking.venue_name}</div>
           <div className="cm-date">
-            {new Date(booking.event_date).toLocaleDateString('en-PK', { day:'numeric', month:'long', year:'numeric' })}
+            {new Date(booking.event_date).toLocaleDateString('en-PK', { day: 'numeric', month: 'long', year: 'numeric' })}
           </div>
         </div>
 
@@ -94,11 +96,11 @@ export default function CancelModal({ booking, onClose, onConfirmed }) {
         <div className="cm-policy-info">
           <div className="cm-policy-info-title">Cancellation Policy</div>
           {[
-            { range: 'More than 7 days',  refund: '90%' },
-            { range: '5 – 7 days',        refund: '80%' },
-            { range: '3 – 5 days',        refund: '50%' },
-            { range: '1 – 3 days',        refund: '30%' },
-            { range: 'Same day', refund: '0%'  },
+            { range: 'More than 7 days', refund: '90%' },
+            { range: '5 – 7 days', refund: '80%' },
+            { range: '3 – 5 days', refund: '50%' },
+            { range: '1 – 3 days', refund: '30%' },
+            { range: 'Same day', refund: '0%' },
           ].map(p => (
             <div key={p.range} className="cm-policy-tier">
               <span>{p.range}</span>
