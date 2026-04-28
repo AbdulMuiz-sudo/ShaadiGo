@@ -66,7 +66,6 @@ function OwnerDashboard() {
                         <h1>Owner Portal</h1>
                         <p>Welcome back, <strong>{loggedInUser.full_name}</strong>. Manage your venue bookings here.</p>
                     </div>
-                    {/* Find this block and update the onClick */}
                     <button className="db-btn-new" onClick={() => navigate('/add-venue')}>
                         + Add New Venue
                     </button>

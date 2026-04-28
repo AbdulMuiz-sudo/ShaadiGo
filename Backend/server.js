@@ -558,6 +558,23 @@ app.post('/api/chat/:bookingId', async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 });
+// ── OWNER DASHBOARD: GET OWNER'S VENUES ──────────────────────────────────────
+app.get('/api/owner/my-venues/:ownerId', async (req, res) => {
+  try {
+    const result = await pool.request()
+      .input('ownerId', sql.Int, req.params.ownerId)
+      .query(`
+        SELECT v.*, 
+          (SELECT COUNT(*) FROM bookings b WHERE b.venue_id = v.venue_id) as total_bookings
+        FROM venues v
+        WHERE v.owner_id = @ownerId
+        ORDER BY v.venue_id DESC
+      `);
+    res.json({ success: true, venues: result.recordset });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
 // ── START SERVER ──────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 5001;
 

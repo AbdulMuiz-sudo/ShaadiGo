@@ -10,10 +10,9 @@ function Header() {
 
     const loggedInUser = JSON.parse(localStorage.getItem('user') || 'null');
 
-    // Check if the current logged-in user is an owner
+    // Identify if the logged-in user is a venue owner
     const isOwner = loggedInUser?.role === 'owner';
 
-    // Close dropdown when clicking outside
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -31,49 +30,43 @@ function Header() {
         navigate('/login');
     };
 
-    // Smart Logo Click: Owners go to their portal, customers go to the homepage
-    const handleBrandClick = () => {
-        if (isOwner) {
-            navigate('/owner-dashboard');
-        } else {
-            navigate('/');
-        }
-    };
-
     return (
         <header className="header-container">
-            <span className="brand" onClick={handleBrandClick} style={{ cursor: 'pointer' }}>
+            <span className="brand" onClick={() => navigate(isOwner ? '/owner-dashboard' : '/')} style={{ cursor: 'pointer' }}>
                 ShaadiGo
             </span>
 
             <div className="header-nav">
 
-                {/* CONDITIONAL RENDERING: Hide these links if the user is an owner */}
+                {/* 1. SHOW THESE LINKS ONLY TO CUSTOMERS (OR GUESTS) */}
                 {!isOwner && (
                     <>
                         <span className="nav-link" onClick={() => navigate('/about')}>Home</span>
                         <span className="nav-link" onClick={() => navigate('/venues')}>Venues</span>
-                        <span className="nav-link" onClick={() => navigate('/contact')}>Contact</span>
                         <span className="nav-link" onClick={() => navigate('/dashboard')}>Bookings</span>
+                        <span className="nav-link" onClick={() => navigate('/contact')}>Contact</span>
+                    </>
+                )}
+
+                {/* 2. SHOW THESE LINKS ONLY TO VENUE OWNERS */}
+                {isOwner && (
+                    <>
+                        <span className="nav-link" onClick={() => navigate('/owner-dashboard')}>Dashboard</span>
+                        <span className="nav-link" onClick={() => navigate('/owner-venues')}>My Venues</span>
                     </>
                 )}
 
                 {loggedInUser ? (
                     <div className="user-profile-wrapper" ref={dropdownRef}>
-                        <div
-                            className="user-icon-trigger"
-                            onClick={() => setDropdownOpen(!dropdownOpen)}
-                        >
+                        <div className="user-icon-trigger" onClick={() => setDropdownOpen(!dropdownOpen)}>
                             <FaUserCircle size={28} className="user-icon" />
-                            <span className="user-name-label">{loggedInUser.full_name?.split(' ')[0] || 'User'}</span>
+                            <span className="user-name-label">
+                                {loggedInUser.full_name?.split(' ')[0] || loggedInUser.username || 'User'}
+                            </span>
                         </div>
 
                         {dropdownOpen && (
                             <div className="user-dropdown-menu">
-                                <div className="dropdown-item" onClick={() => { navigate(isOwner ? '/owner-dashboard' : '/dashboard'); setDropdownOpen(false); }}>
-                                    <FaChartPie className="dropdown-icon" />
-                                    {isOwner ? 'Portal' : 'Dashboard'}
-                                </div>
                                 <div className="dropdown-divider"></div>
                                 <div className="dropdown-item logout-item" onClick={handleLogout}>
                                     <FaSignOutAlt className="dropdown-icon" />
