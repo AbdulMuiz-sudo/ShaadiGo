@@ -12,6 +12,8 @@ import Contact from './components/Contact';
 import Dashboard from './components/Dashboard';
 import AboutUs from './components/AboutUs';
 import Chat from './components/Chat';
+import OwnerDashboard from './components/ownerdashboard';
+import AddVenue from './components/addvenue';
 import './App.css';
 
 // A layout wrapper so we don't have to copy-paste the header/footer on both pages
@@ -47,7 +49,9 @@ function App() {
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/chat" element={<Chat />} />
+                <Route path="/owner-dashboard" element={<OwnerDashboard />} /> {/* NEW ROUTE */}
                 <Route path="/about" element={<AboutUs />} />
+                <Route path="/add-venue" element={<AddVenue />} />
                 {/* Catch-all fallback */}
                 <Route path="*" element={<Navigate to="/login" />} />
             </Routes>

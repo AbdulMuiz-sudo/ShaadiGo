@@ -403,7 +403,161 @@ app.get('/api/reviews/:venueId', async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 });
+// ── OWNER DASHBOARD: GET OWNER'S BOOKINGS ──────────────────────────────────────
+app.get('/api/owner/bookings/:ownerId', async (req, res) => {
+  try {
+    const result = await pool.request()
+      .input('ownerId', sql.Int, req.params.ownerId)
+      .query(`
+        SELECT b.*, v.venue_name, v.location, u.full_name as customer_name, u.phone as customer_phone
+        FROM bookings b 
+        JOIN venues v ON b.venue_id = v.venue_id 
+        JOIN users u ON b.user_id = u.user_id
+        WHERE v.owner_id = @ownerId
+        ORDER BY b.created_at DESC
+      `);
+    res.json({ success: true, bookings: result.recordset });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
 
+// ── OWNER DASHBOARD: CONFIRM BOOKING & PAYMENT ───────────────────────────────
+app.patch('/api/owner/bookings/:bookingId/confirm', async (req, res) => {
+  try {
+    await pool.request()
+      .input('bookingId', sql.Int, req.params.bookingId)
+      .query(`UPDATE bookings SET booking_status = 'confirmed' WHERE booking_id = @bookingId`);
+
+    res.json({ success: true, message: 'Payment verified and booking confirmed!' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+// ── OWNER DASHBOARD: ADD NEW VENUE ───────────────────────────────────────────
+app.post('/api/owner/venues', async (req, res) => {
+  const {
+    ownerId, venueName, location, city, capacity, price,
+    description, cancellationPolicy, images, foodPackages, decorations
+  } = req.body;
+
+  try {
+    // 1. Insert Main Venue and get the new ID
+    const venueInsert = await pool.request()
+      .input('ownerId', sql.Int, ownerId)
+      .input('name', sql.VarChar, venueName)
+      .input('location', sql.VarChar, location)
+      .input('city', sql.VarChar, city)
+      .input('capacity', sql.Int, capacity)
+      .input('price', sql.Decimal(10, 2), price)
+      .input('desc', sql.VarChar, description)
+      .input('policy', sql.VarChar, cancellationPolicy)
+      .query(`
+        INSERT INTO venues (owner_id, venue_name, location, city, capacity, price_per_event, description, cancellation_policy)
+        OUTPUT INSERTED.venue_id
+        VALUES (@ownerId, @name, @location, @city, @capacity, @price, @desc, @policy)
+      `);
+
+    const newVenueId = venueInsert.recordset[0].venue_id;
+
+    // 2. Insert Images (if any)
+    if (images && images.length > 0) {
+      for (const url of images) {
+        if (url.trim() !== '') {
+          await pool.request()
+            .input('vid', sql.Int, newVenueId)
+            .input('url', sql.VarChar, url)
+            .query(`INSERT INTO venue_images (venue_id, image_url) VALUES (@vid, @url)`);
+        }
+      }
+    }
+
+    // 3. Insert Food Packages
+    if (foodPackages && foodPackages.length > 0) {
+      for (const food of foodPackages) {
+        if (food.name.trim() !== '') {
+          await pool.request()
+            .input('vid', sql.Int, newVenueId)
+            .input('name', sql.VarChar, food.name)
+            .input('desc', sql.VarChar, food.desc)
+            .input('price', sql.Decimal(10, 2), food.price)
+            .query(`INSERT INTO food_packages (venue_id, package_name, description, price_per_person) VALUES (@vid, @name, @desc, @price)`);
+        }
+      }
+    }
+
+    // 4. Insert Decorations
+    if (decorations && decorations.length > 0) {
+      for (const decor of decorations) {
+        if (decor.name.trim() !== '') {
+          await pool.request()
+            .input('vid', sql.Int, newVenueId)
+            .input('name', sql.VarChar, decor.name)
+            .input('desc', sql.VarChar, decor.desc)
+            .input('price', sql.Decimal(10, 2), decor.price)
+            .query(`INSERT INTO decorations (venue_id, decoration_name, description, price) VALUES (@vid, @name, @desc, @price)`);
+        }
+      }
+    }
+
+    res.json({ success: true, message: 'Venue successfully created!', venueId: newVenueId });
+  } catch (err) {
+    console.error('Add Venue Error:', err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+// ── GET CHAT MESSAGES (BI-DIRECTIONAL) ──────────────────────────────────────
+app.get('/api/chat/:bookingId', async (req, res) => {
+  try {
+    const result = await pool.request()
+      .input('bookingId', sql.Int, req.params.bookingId)
+      .query(`
+        SELECT m.*, u.full_name as sender_name 
+        FROM messages m
+        JOIN users u ON m.sender_id = u.user_id
+        WHERE m.booking_id = @bookingId
+        ORDER BY m.sent_at ASC
+      `);
+
+    res.json({ success: true, messages: result.recordset });
+  } catch (err) {
+    console.error("Chat GET Error:", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// ── POST CHAT MESSAGE / RECEIPT ─────────────────────────────────────────────
+// ── POST CHAT MESSAGE / RECEIPT ─────────────────────────────────────────────
+app.post('/api/chat/:bookingId', async (req, res) => {
+  // 1. Extract receiverId from the incoming request
+  const { userId, receiverId, message, messageType, imageData } = req.body;
+  const bookingId = req.params.bookingId;
+
+  const finalText = messageType === 'image' ? `[IMAGE]${imageData}` : message;
+
+  try {
+    const insert = await pool.request()
+      .input('bookingId', sql.Int, bookingId)
+      .input('senderId', sql.Int, userId)
+      .input('receiverId', sql.Int, receiverId) // 2. Add it as an SQL input
+      .input('msgText', sql.VarChar(sql.MAX), finalText)
+      .query(`
+        -- 3. Include receiver_id in the INSERT statement
+        INSERT INTO messages (booking_id, sender_id, receiver_id, message_text)
+        OUTPUT INSERTED.message_id, INSERTED.sent_at
+        VALUES (@bookingId, @senderId, @receiverId, @msgText)
+      `);
+
+    res.json({
+      success: true,
+      message_id: insert.recordset[0].message_id,
+      sent_at: insert.recordset[0].sent_at
+    });
+  } catch (err) {
+    console.error("Chat POST Error:", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
 // ── START SERVER ──────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 5001;
 

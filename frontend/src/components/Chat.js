@@ -2,10 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Header from './Header';
 import Footer from './Footer';
-import {
-  FiArrowLeft, FiPaperclip, FiSend, FiImage, FiCreditCard,
-  FiMessageCircle, FiCheck, FiX, FiAlertCircle
-} from 'react-icons/fi';
+import { FiArrowLeft, FiPaperclip, FiSend, FiImage, FiCreditCard, FiMessageCircle, FiCheck, FiX, FiAlertCircle } from 'react-icons/fi';
 import { FaLandmark } from 'react-icons/fa';
 import './style/Chat.css';
 
@@ -16,6 +13,10 @@ function Chat() {
 
   const loggedInUser = JSON.parse(localStorage.getItem('user') || 'null');
 
+  // BI-DIRECTIONAL LOGIC
+  const isOwner = loggedInUser?.role === 'owner';
+  const chatPartnerId = isOwner ? booking?.user_id : (booking?.owner_id || 1);
+
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(true);
@@ -24,13 +25,11 @@ function Chat() {
   const [previewImg, setPreviewImg] = useState(null);
   const bottomRef = useRef(null);
   const fileInputRef = useRef(null);
-  const [bookingStatus, setBookingStatus] = useState(booking?.booking_status || 'pending');
-
-  const ownerId = booking?.owner_id || 1;
+  const [bookingStatus, setBookingStatus] = useState(booking?.booking_status || booking?.status || 'pending');
 
   useEffect(() => {
     if (!booking || !loggedInUser) {
-      navigate('/dashboard');
+      navigate(isOwner ? '/owner-dashboard' : '/dashboard');
       return;
     }
     fetchMessages();
@@ -44,15 +43,21 @@ function Chat() {
 
   const fetchMessages = async () => {
     try {
-      const res = await fetch(`http://localhost:5001/api/messages/${loggedInUser.user_id}/${ownerId}`);
+      const res = await fetch(`http://localhost:5001/api/chat/${booking.booking_id}`);
       const data = await res.json();
 
       if (data.success) {
         const formattedMessages = data.messages.map(m => {
           const isImage = m.message_text.startsWith('[IMAGE]');
+
+          // FIX: Enforce Number() to prevent Javascript "String === Number" mismatches
+          const senderRole = Number(m.sender_id) === Number(loggedInUser.user_id)
+            ? (isOwner ? 'owner' : 'customer')
+            : (isOwner ? 'customer' : 'owner');
+
           return {
             message_id: m.message_id,
-            sender: m.sender_id === loggedInUser.user_id ? 'customer' : 'owner',
+            sender: senderRole,
             message_type: isImage ? 'image' : 'text',
             message: isImage ? 'Payment Receipt' : m.message_text,
             image_data: isImage ? m.message_text.replace('[IMAGE]', '') : null,
@@ -75,7 +80,7 @@ function Chat() {
 
     const tempMsg = {
       message_id: Date.now(),
-      sender: 'customer',
+      sender: isOwner ? 'owner' : 'customer',
       message: input.trim(),
       message_type: 'text',
       sent_at: new Date().toISOString(),
@@ -87,26 +92,22 @@ function Chat() {
     setInput('');
 
     try {
-      const res = await fetch(`http://localhost:5001/api/messages`, {
+      const res = await fetch(`http://localhost:5001/api/chat/${booking.booking_id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          senderId: loggedInUser.user_id,
-          receiverId: ownerId,
-          messageText: tempMsg.message,
+          userId: loggedInUser.user_id,
+          receiverId: chatPartnerId,
+          message: tempMsg.message,
+          messageType: 'text'
         }),
       });
       const data = await res.json();
       if (data.success) {
-        setMessages(prev =>
-          prev.map(m => m.message_id === tempMsg.message_id
-            ? { ...m, message_id: data.message_id, sent_at: data.sent_at, pending: false }
-            : m
-          )
-        );
+        setMessages(prev => prev.map(m => m.message_id === tempMsg.message_id ? { ...m, message_id: data.message_id, sent_at: data.sent_at, pending: false } : m));
       } else {
         setMessages(prev => prev.filter(m => m.message_id !== tempMsg.message_id));
-        setError(data.message);
+        setError(data.message || 'Failed to send');
       }
     } catch {
       setMessages(prev => prev.filter(m => m.message_id !== tempMsg.message_id));
@@ -117,15 +118,13 @@ function Chat() {
   };
 
   const handleImageUpload = async (e) => {
-    if (bookingStatus === 'cancelled') return;
-
+    if (bookingStatus === 'cancelled' || isOwner) return;
     const file = e.target.files?.[0];
     if (!file) return;
 
     const reader = new FileReader();
     reader.onload = async () => {
       const base64 = reader.result;
-
       const tempMsg = {
         message_id: Date.now(),
         sender: 'customer',
@@ -141,27 +140,22 @@ function Chat() {
       setSending(true);
 
       try {
-        const res = await fetch(`http://localhost:5001/api/messages`, {
+        const res = await fetch(`http://localhost:5001/api/chat/${booking.booking_id}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            senderId: loggedInUser.user_id,
-            receiverId: ownerId,
-            messageText: `[IMAGE]${base64}`,
+            userId: loggedInUser.user_id,
+            receiverId: chatPartnerId,
+            messageType: 'image',
+            imageData: base64
           }),
         });
         const data = await res.json();
-
         if (data.success) {
-          setMessages(prev =>
-            prev.map(m => m.message_id === tempMsg.message_id
-              ? { ...m, message_id: data.message_id, sent_at: data.sent_at, pending: false }
-              : m
-            )
-          );
+          setMessages(prev => prev.map(m => m.message_id === tempMsg.message_id ? { ...m, message_id: data.message_id, sent_at: data.sent_at, pending: false } : m));
         } else {
           setMessages(prev => prev.filter(m => m.message_id !== tempMsg.message_id));
-          setError(data.message);
+          setError(data.message || 'Failed to send image');
         }
       } catch {
         setMessages(prev => prev.filter(m => m.message_id !== tempMsg.message_id));
@@ -174,43 +168,35 @@ function Chat() {
     reader.readAsDataURL(file);
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
-  };
+  const handleKeyDown = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } };
 
   const formatTime = (str) => {
     const d = new Date(str);
-    return d.toLocaleTimeString('en-PK', { hour: '2-digit', minute: '2-digit' }) +
-      ' · ' + d.toLocaleDateString('en-PK', { day: 'numeric', month: 'short' });
+    return d.toLocaleTimeString('en-PK', { hour: '2-digit', minute: '2-digit' }) + ' · ' + d.toLocaleDateString('en-PK', { day: 'numeric', month: 'short' });
   };
 
   if (!booking || !loggedInUser) return null;
-
   const ref = `SG-${new Date(booking.created_at || Date.now()).getFullYear()}-${String(booking.booking_id).padStart(5, '0')}`;
+
+  const chatHeaderTitle = isOwner ? `Chat with ${booking.customer_name || 'Customer'}` : `${booking.venue_name} — Owner`;
+  const chatHeaderSubtitle = isOwner ? `Booking Reference: ${ref}` : `Venue Manager`;
 
   return (
     <div className="ch-page">
       <Header />
       <main className="ch-main">
-
-        <button className="ch-back" onClick={() => navigate('/dashboard')}>
+        <button className="ch-back" onClick={() => navigate(isOwner ? '/owner-dashboard' : '/dashboard')}>
           <FiArrowLeft style={{ marginRight: '6px' }} />
-          Back to Dashboard
+          Back to {isOwner ? 'Portal' : 'Dashboard'}
         </button>
 
         <div className="ch-layout">
-
-          {/* SIDEBAR */}
           <div className="ch-info-card">
             <div className="ch-info-emoji"><FaLandmark size={32} color="#D4AF37" /></div>
             <div className="ch-info-venue">{booking.venue_name}</div>
             <div className="ch-info-location">{booking.location || 'Lahore'}</div>
             <div className="ch-info-divider"></div>
             <div className="ch-info-row"><span>Reference</span><strong>{ref}</strong></div>
-            <div className="ch-info-row">
-              <span>Date</span>
-              <strong>{new Date(booking.event_date).toLocaleDateString('en-PK', { day: 'numeric', month: 'short', year: 'numeric' })}</strong>
-            </div>
             <div className="ch-info-row">
               <span>Status</span>
               <strong className={`ch-status ch-status--${bookingStatus}`}>
@@ -219,62 +205,34 @@ function Chat() {
             </div>
             <div className="ch-info-divider"></div>
 
-            {/* PAYMENT SECTION - HIDE IF CANCELLED */}
-            {bookingStatus !== 'cancelled' ? (
+            {!isOwner && bookingStatus !== 'cancelled' ? (
               <div className="ch-payment-section">
-                <div className="ch-payment-title">
-                  <FiCreditCard size={18} style={{ marginRight: '6px' }} />
-                  Send Payment
-                </div>
-                <div className="ch-payment-desc">
-                  Transfer your advance payment and send the screenshot here for venue owner confirmation.
-                </div>
+                <div className="ch-payment-title"><FiCreditCard size={18} style={{ marginRight: '6px' }} /> Send Payment</div>
+                <div className="ch-payment-desc">Transfer your advance payment and send the screenshot.</div>
                 <div className="ch-payment-amount">
                   PKR {Number(booking.advance_paid || 0).toLocaleString('en-IN')}
-                  {/* FIX: Smart label updates based on status */}
                   <span>{bookingStatus === 'pending' ? 'advance due' : 'advance paid'}</span>
                 </div>
-                <button
-                  className="ch-payment-btn"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={sending}
-                >
+                <button className="ch-payment-btn" onClick={() => fileInputRef.current?.click()} disabled={sending}>
                   <FiImage size={16} style={{ marginRight: '6px' }} /> Upload Receipt
                 </button>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  style={{ display: 'none' }}
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                />
+                <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept="image/*" onChange={handleImageUpload} />
               </div>
-            ) : (
-              <div className="ch-payment-section" style={{ background: '#fff5f5', border: '1px solid #fbcaca' }}>
-                <div className="ch-payment-title" style={{ color: '#d93025' }}>
-                  <FiAlertCircle size={18} style={{ marginRight: '6px' }} />
-                  Booking Cancelled
-                </div>
-                <div className="ch-payment-desc" style={{ color: '#d93025', opacity: 0.8 }}>
-                  Payments and file uploads are disabled for cancelled bookings.
+            ) : isOwner ? (
+              <div className="ch-payment-section" style={{ background: '#f5f5f5', border: '1px solid #ddd' }}>
+                <div className="ch-payment-desc" style={{ color: '#444' }}>
+                  When the customer uploads a receipt, verify it and click <strong>Confirm Booking</strong> in your Portal.
                 </div>
               </div>
-            )}
-
-            <div className="ch-info-divider"></div>
-            <div className="ch-info-note">
-              <FiMessageCircle size={14} style={{ marginRight: '6px' }} />
-              Messages are securely saved and private between you and the venue owner.
-            </div>
+            ) : null}
           </div>
 
-          {/* CHAT WINDOW */}
           <div className="ch-window">
             <div className="ch-window-header">
               <div className="ch-owner-avatar"><FaLandmark color="#D4AF37" /></div>
               <div>
-                <div className="ch-owner-name">{booking.venue_name} — Owner</div>
-                <div className="ch-owner-sub">Venue Manager</div>
+                <div className="ch-owner-name">{chatHeaderTitle}</div>
+                <div className="ch-owner-sub">{chatHeaderSubtitle}</div>
               </div>
             </div>
 
@@ -288,103 +246,67 @@ function Chat() {
                   <div style={{ marginTop: '10px' }}>No messages yet.</div>
                   {bookingStatus !== 'cancelled' && (
                     <div style={{ fontSize: '0.78rem', opacity: 0.5, marginTop: 4 }}>
-                      Start the conversation with the venue owner!
+                      Start the conversation!
                     </div>
                   )}
                 </div>
               )}
 
               {messages.map(msg => {
-                const isMe = msg.sender === 'customer';
+                const isMe = msg.sender === (isOwner ? 'owner' : 'customer');
+
+                // Determine exactly what label to show above the text
+                const senderLabel = msg.sender === 'owner'
+                  ? (isOwner ? 'You (Owner)' : 'Venue Owner')
+                  : (isOwner ? 'Customer' : 'You (Customer)');
+
                 return (
                   <div key={msg.message_id} className={`ch-msg-row ${isMe ? 'ch-msg-row--me' : 'ch-msg-row--owner'}`}>
-                    {!isMe && <div className="ch-avatar ch-avatar--owner"><FaLandmark color="#D4AF37" /></div>}
-
                     <div className={`ch-bubble ${isMe ? 'ch-bubble--me' : 'ch-bubble--owner'} ${msg.pending ? 'ch-bubble--pending' : ''}`}>
+
+                      {/* SENDER LABEL */}
+                      <div style={{ fontSize: '0.7rem', fontWeight: 700, opacity: 0.6, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        {senderLabel}
+                      </div>
+
                       {msg.message_type === 'image' && msg.image_data ? (
                         <div className="ch-bubble-image-wrap">
-                          <div className="ch-bubble-image-label">
-                            <FiImage size={14} style={{ marginRight: '4px' }} /> Payment Screenshot
-                          </div>
-                          <img
-                            src={msg.image_data}
-                            alt="Payment receipt"
-                            className="ch-bubble-image"
-                            onClick={() => setPreviewImg(msg.image_data)}
-                          />
+                          <img src={msg.image_data} alt="Receipt" className="ch-bubble-image" onClick={() => setPreviewImg(msg.image_data)} />
                         </div>
                       ) : (
                         <div className="ch-bubble-text">{msg.message}</div>
                       )}
-                      <div className="ch-bubble-time">
-                        {msg.pending ? 'Sending...' : formatTime(msg.sent_at)}
-                        {isMe && !msg.pending && <FiCheck style={{ marginLeft: '4px' }} />}
-                      </div>
+                      <div className="ch-bubble-time">{msg.pending ? 'Sending...' : formatTime(msg.sent_at)}</div>
                     </div>
-
-                    {isMe && (
-                      <div className="ch-avatar ch-avatar--me">
-                        {loggedInUser.full_name?.charAt(0).toUpperCase() || 'U'}
-                      </div>
-                    )}
                   </div>
                 );
               })}
               <div ref={bottomRef}></div>
             </div>
 
-            {/* INPUT BAR - HIDE IF CANCELLED */}
-            {bookingStatus !== 'cancelled' ? (
+            {bookingStatus !== 'cancelled' && (
               <div className="ch-input-bar">
-                <button
-                  className="ch-attach-btn"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={sending}
-                  title="Send payment screenshot"
-                >
-                  <FiPaperclip size={20} />
-                </button>
-                <textarea
-                  className="ch-input"
-                  placeholder="Type your message… (Enter to send, Shift+Enter for new line)"
-                  value={input}
-                  onChange={e => setInput(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  rows={1}
-                />
-                <button
-                  className="ch-send-btn"
-                  onClick={handleSend}
-                  disabled={!input.trim() || sending}
-                >
-                  <FiSend size={18} />
-                </button>
-              </div>
-            ) : (
-              <div className="ch-input-bar" style={{ justifyContent: 'center', background: '#f5f5f5', color: '#888', fontWeight: '500', padding: '20px' }}>
-                Chat has been disabled because this booking is cancelled.
+                {!isOwner && (
+                  <button className="ch-attach-btn" onClick={() => fileInputRef.current?.click()} disabled={sending}><FiPaperclip size={20} /></button>
+                )}
+                <textarea className="ch-input" placeholder="Type your message…" value={input} onChange={e => setInput(e.target.value)} onKeyDown={handleKeyDown} rows={1} />
+                <button className="ch-send-btn" onClick={handleSend} disabled={!input.trim() || sending}><FiSend size={18} /></button>
               </div>
             )}
-
           </div>
         </div>
       </main>
 
-      {/* IMAGE PREVIEW LIGHTBOX */}
       {previewImg && (
         <div className="ch-preview-overlay" onClick={() => setPreviewImg(null)}>
           <div className="ch-preview-wrap" onClick={e => e.stopPropagation()}>
-            <button className="ch-preview-close" onClick={() => setPreviewImg(null)}>
-              <FiX size={24} />
-            </button>
+            <button className="ch-preview-close" onClick={() => setPreviewImg(null)}><FiX size={24} /></button>
             <img src={previewImg} alt="Receipt preview" className="ch-preview-img" />
           </div>
         </div>
       )}
-
       <Footer />
     </div>
   );
 }
-
 export default Chat;
