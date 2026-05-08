@@ -5,11 +5,9 @@ const sql = require("mssql/msnodesqlv8");
 
 const app = express();
 
-// ── MIDDLEWARE ────────────────────────────────────────────────────────────────
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
-// Frontend is running on 3000
 app.use(cors({
   origin: "http://localhost:3000",
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
@@ -17,7 +15,6 @@ app.use(cors({
   credentials: true
 }));
 
-// ── DB CONFIG ─────────────────────────────────────────────────────────────────
 const config = {
   connectionString: "Driver={ODBC Driver 18 for SQL Server};Server=localhost;Database=shaadigo_db;UID=sa;PWD=123456;Encrypt=Yes;TrustServerCertificate=Yes"
 };
@@ -27,15 +24,15 @@ async function connectDB() {
   try {
     pool = new sql.ConnectionPool(config);
     await pool.connect();
-    console.log("✅ Connected to shaadigo_db database using ODBC Driver");
+    console.log(" Connected to shaadigo_db database using ODBC Driver");
   } catch (e) {
-    console.log("❌ Error Occurred", e);
+    console.log(" Error Occurred", e);
     process.exit(1);
   }
 }
 connectDB();
 
-// ── SIGNUP ────────────────────────────────────────────────────────────────────
+// ── SIGNUP (Using Stored Procedure) ───────────────────────────────────────────
 app.post('/api/signup', async (req, res) => {
   const { fullName, email, password, phone, role } = req.body;
   if (!fullName || !email || !password)
@@ -52,13 +49,12 @@ app.post('/api/signup', async (req, res) => {
       return res.status(409).json({ success: false, message: 'Email already registered.' });
 
     await pool.request()
-      .input('fullName', sql.VarChar, fullName)
+      .input('name', sql.VarChar, fullName)
       .input('email', sql.VarChar, email)
-      .input('password', sql.VarChar, password)
+      .input('pass', sql.VarChar, password)
       .input('phone', sql.VarChar, phone || null)
       .input('role', sql.VarChar, role || 'customer')
-      .query(`INSERT INTO users (full_name, email, password_hash, phone, role) 
-              VALUES (@fullName, @email, @password, @phone, @role)`);
+      .execute('sp_register_user');
 
     res.json({ success: true, message: 'Account created successfully! You can now log in.' });
   } catch (err) {
@@ -67,7 +63,7 @@ app.post('/api/signup', async (req, res) => {
   }
 });
 
-// ── LOGIN ─────────────────────────────────────────────────────────────────────
+// ── LOGIN (Using Stored Procedure) ────────────────────────────────────────────
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password)
@@ -76,8 +72,8 @@ app.post('/api/login', async (req, res) => {
   try {
     const result = await pool.request()
       .input('email', sql.VarChar, email)
-      .input('password', sql.VarChar, password)
-      .query('SELECT user_id, full_name, role FROM users WHERE email = @email AND password_hash = @password');
+      .input('pass', sql.VarChar, password)
+      .execute('sp_login_user');
 
     if (result.recordset.length === 0)
       return res.status(401).json({ success: false, message: 'Incorrect email or password.' });
@@ -93,7 +89,7 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-// ── BOOKING ───────────────────────────────────────────────────────────────────
+// ── BOOKING (Using Stored Procedure) ──────────────────────────────────────────
 app.post('/api/booking', async (req, res) => {
   const { userId, venueId, eventDate, advancePaid, termsId } = req.body;
   if (!userId || !venueId || !eventDate)
@@ -102,29 +98,18 @@ app.post('/api/booking', async (req, res) => {
   try {
     const venueResult = await pool.request()
       .input('venueId', sql.Int, venueId)
-      .query('SELECT venue_id, price_per_event FROM venues WHERE venue_id = @venueId');
+      .query('SELECT venue_id FROM venues WHERE venue_id = @venueId');
 
     if (venueResult.recordset.length === 0)
       return res.status(404).json({ success: false, message: 'Venue not found.' });
 
-    const conflict = await pool.request()
-      .input('venueId', sql.Int, venueId)
-      .input('eventDate', sql.Date, eventDate)
-      .query(`SELECT booking_id FROM bookings 
-              WHERE venue_id = @venueId AND event_date = @eventDate AND booking_status != 'cancelled'`);
-
-    if (conflict.recordset.length > 0)
-      return res.status(409).json({ success: false, message: 'This venue is already booked on that date.' });
-
     const insert = await pool.request()
-      .input('userId', sql.Int, userId)
-      .input('venueId', sql.Int, venueId)
-      .input('termsId', sql.Int, termsId || null)
-      .input('eventDate', sql.Date, eventDate)
-      .input('advancePaid', sql.Decimal(10, 2), advancePaid || 0)
-      .query(`INSERT INTO bookings (user_id, venue_id, terms_id, event_date, booking_status, advance_paid)
-              OUTPUT INSERTED.booking_id
-              VALUES (@userId, @venueId, @termsId, @eventDate, 'pending', @advancePaid)`);
+      .input('uid', sql.Int, userId)
+      .input('vid', sql.Int, venueId)
+      .input('terms', sql.Int, termsId || null)
+      .input('date', sql.Date, eventDate)
+      .input('advance', sql.Decimal(10, 2), advancePaid || 0)
+      .execute('sp_create_booking');
 
     const bookingId = insert.recordset[0].booking_id;
     res.json({
@@ -134,6 +119,9 @@ app.post('/api/booking', async (req, res) => {
     });
   } catch (err) {
     console.error('Booking error:', err);
+    if (err.number === 50001) {
+      return res.status(409).json({ success: false, message: err.message });
+    }
     res.status(500).json({ success: false, message: err.message });
   }
 });
@@ -150,7 +138,7 @@ app.get('/api/venues', async (req, res) => {
   }
 });
 
-// ── SEARCH & FILTER VENUES (MUST BE BEFORE /:venueId) ─────────────────────────
+// ── SEARCH & FILTER VENUES ────────────────────────────────────────────────────
 app.get('/api/venues/search', async (req, res) => {
   const { search, city, minPrice, maxPrice, minCapacity } = req.query;
   try {
@@ -196,7 +184,7 @@ app.get('/api/venues/:venueId', async (req, res) => {
   try {
     const venue = await pool.request()
       .input('venueId', sql.Int, req.params.venueId)
-      .query('SELECT * FROM venues WHERE venue_id = @venueId');
+      .query('SELECT * FROM vw_venue_details WHERE venue_id = @venueId');
 
     const images = await pool.request()
       .input('venueId', sql.Int, req.params.venueId)
@@ -258,32 +246,26 @@ app.get('/api/bookings/:userId', async (req, res) => {
   }
 });
 
-// ── CANCEL BOOKING ────────────────────────────────────────────────────────────
+// ── CANCEL BOOKING (Using Stored Procedure) ───────────────────────────────────
 app.patch('/api/booking/:bookingId/cancel', async (req, res) => {
   const { userId, reason } = req.body;
   try {
     const check = await pool.request()
       .input('bookingId', sql.Int, req.params.bookingId)
       .input('userId', sql.Int, userId)
-      .query(`SELECT booking_id, advance_paid 
-              FROM bookings
+      .query(`SELECT booking_id FROM bookings
               WHERE booking_id = @bookingId AND user_id = @userId AND booking_status != 'cancelled'`);
 
     if (check.recordset.length === 0)
       return res.status(404).json({ success: false, message: 'Booking not found or already cancelled.' });
 
     await pool.request()
-      .input('bookingId', sql.Int, req.params.bookingId)
-      .query(`UPDATE bookings SET booking_status = 'cancelled' WHERE booking_id = @bookingId`);
-
-    await pool.request()
-      .input('bookingId', sql.Int, req.params.bookingId)
-      .input('userId', sql.Int, userId)
+      .input('bid', sql.Int, req.params.bookingId)
+      .input('uid', sql.Int, userId)
       .input('reason', sql.VarChar, reason || 'User requested cancellation')
-      .query(`INSERT INTO cancelled_bookings (booking_id, cancelled_by, cancel_reason) 
-              VALUES (@bookingId, @userId, @reason)`);
+      .execute('sp_cancel_booking');
 
-    res.json({ success: true, message: 'Booking cancelled successfully.' });
+    res.json({ success: true, message: 'Booking cancelled successfully. (Trigger will log this audit!)' });
   } catch (err) {
     console.error('Cancel error:', err);
     res.status(500).json({ success: false, message: err.message });
@@ -291,68 +273,50 @@ app.patch('/api/booking/:bookingId/cancel', async (req, res) => {
 });
 
 // ── MESSAGING / CHAT ──────────────────────────────────────────────────────────
-app.get('/api/messages/:userId/:receiverId', async (req, res) => {
+app.get('/api/chat/:bookingId', async (req, res) => {
   try {
     const result = await pool.request()
-      .input('u1', sql.Int, req.params.userId)
-      .input('u2', sql.Int, req.params.receiverId)
+      .input('bookingId', sql.Int, req.params.bookingId)
       .query(`
-        SELECT m.message_id, m.sender_id, m.receiver_id, m.message_text, m.sent_at, u.full_name as sender_name
+        SELECT m.*, u.full_name as sender_name 
         FROM messages m
         JOIN users u ON m.sender_id = u.user_id
-        WHERE (m.sender_id = @u1 AND m.receiver_id = @u2)
-           OR (m.sender_id = @u2 AND m.receiver_id = @u1)
+        WHERE m.booking_id = @bookingId
         ORDER BY m.sent_at ASC
       `);
+
     res.json({ success: true, messages: result.recordset });
   } catch (err) {
-    console.error('Messages fetch error:', err);
+    console.error("Chat GET Error:", err);
     res.status(500).json({ success: false, message: err.message });
   }
 });
 
-app.post('/api/messages', async (req, res) => {
-  const { senderId, receiverId, messageText } = req.body;
-  if (!senderId || !receiverId || !messageText)
-    return res.status(400).json({ success: false, message: 'Sender, Receiver, and Message text required.' });
+app.post('/api/chat/:bookingId', async (req, res) => {
+  const { userId, receiverId, message, messageType, imageData } = req.body;
+  const bookingId = req.params.bookingId;
+
+  const finalText = messageType === 'image' ? `[IMAGE]${imageData}` : message;
 
   try {
     const insert = await pool.request()
-      .input('senderId', sql.Int, senderId)
+      .input('bookingId', sql.Int, bookingId)
+      .input('senderId', sql.Int, userId)
       .input('receiverId', sql.Int, receiverId)
-      .input('messageText', sql.VarChar, messageText)
-      .query(`INSERT INTO messages (sender_id, receiver_id, message_text)
-              OUTPUT INSERTED.message_id, INSERTED.sent_at
-              VALUES (@senderId, @receiverId, @messageText)`);
+      .input('msgText', sql.VarChar(sql.MAX), finalText)
+      .query(`
+        INSERT INTO messages (booking_id, sender_id, receiver_id, message_text)
+        OUTPUT INSERTED.message_id, INSERTED.sent_at
+        VALUES (@bookingId, @senderId, @receiverId, @msgText)
+      `);
 
     res.json({
       success: true,
       message_id: insert.recordset[0].message_id,
-      sent_at: insert.recordset[0].sent_at,
+      sent_at: insert.recordset[0].sent_at
     });
   } catch (err) {
-    console.error('Message send error:', err);
-    res.status(500).json({ success: false, message: err.message });
-  }
-});
-
-// ── SUPPORT TICKETS ───────────────────────────────────────────────────────────
-app.post('/api/support', async (req, res) => {
-  const { userId, subject, message } = req.body;
-  if (!userId || !message)
-    return res.status(400).json({ success: false, message: 'User ID and message are required.' });
-
-  try {
-    await pool.request()
-      .input('userId', sql.Int, userId)
-      .input('subject', sql.VarChar, subject || 'General Inquiry')
-      .input('message', sql.VarChar, message)
-      .query(`INSERT INTO support_tickets (user_id, subject, message)
-              VALUES (@userId, @subject, @message)`);
-
-    res.json({ success: true, message: 'Support ticket submitted successfully.' });
-  } catch (err) {
-    console.error('Support ticket error:', err);
+    console.error("Chat POST Error:", err);
     res.status(500).json({ success: false, message: err.message });
   }
 });
@@ -388,21 +352,6 @@ app.post('/api/review', async (req, res) => {
   }
 });
 
-app.get('/api/reviews/:venueId', async (req, res) => {
-  try {
-    const result = await pool.request()
-      .input('venueId', sql.Int, req.params.venueId)
-      .query(`SELECT r.review_id, r.rating, r.comment, r.created_at, u.full_name
-              FROM reviews r
-              JOIN users u ON u.user_id = r.user_id
-              WHERE r.venue_id = @venueId
-              ORDER BY r.created_at DESC`);
-    res.json({ success: true, reviews: result.recordset });
-  } catch (err) {
-    console.error('Reviews fetch error:', err);
-    res.status(500).json({ success: false, message: err.message });
-  }
-});
 // ── OWNER DASHBOARD: GET OWNER'S BOOKINGS ──────────────────────────────────────
 app.get('/api/owner/bookings/:ownerId', async (req, res) => {
   try {
@@ -422,142 +371,23 @@ app.get('/api/owner/bookings/:ownerId', async (req, res) => {
   }
 });
 
-// ── OWNER DASHBOARD: CONFIRM BOOKING & PAYMENT ───────────────────────────────
-app.patch('/api/owner/bookings/:bookingId/confirm', async (req, res) => {
+// ── OWNER DASHBOARD: CONFIRM BOOKING & PAYMENT (Using Trigger) ────────────────
+app.post('/api/owner/bookings/:bookingId/confirm', async (req, res) => {
+  const { amount } = req.body; // Expect owner to submit the amount paid
   try {
+    // The trg_auto_confirm_booking Trigger in SQL will automatically update the booking to 'confirmed'
     await pool.request()
       .input('bookingId', sql.Int, req.params.bookingId)
-      .query(`UPDATE bookings SET booking_status = 'confirmed' WHERE booking_id = @bookingId`);
+      .input('amount', sql.Decimal(10, 2), amount || 0)
+      .query(`INSERT INTO payments (booking_id, amount, payment_method, payment_status)
+              VALUES (@bookingId, @amount, 'Manual Verification', 'paid')`);
 
-    res.json({ success: true, message: 'Payment verified and booking confirmed!' });
+    res.json({ success: true, message: 'Payment verified and booking auto-confirmed via Database Trigger!' });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
 });
-// ── OWNER DASHBOARD: ADD NEW VENUE ───────────────────────────────────────────
-app.post('/api/owner/venues', async (req, res) => {
-  const {
-    ownerId, venueName, location, city, capacity, price,
-    description, cancellationPolicy, images, foodPackages, decorations
-  } = req.body;
 
-  try {
-    // 1. Insert Main Venue and get the new ID
-    const venueInsert = await pool.request()
-      .input('ownerId', sql.Int, ownerId)
-      .input('name', sql.VarChar, venueName)
-      .input('location', sql.VarChar, location)
-      .input('city', sql.VarChar, city)
-      .input('capacity', sql.Int, capacity)
-      .input('price', sql.Decimal(10, 2), price)
-      .input('desc', sql.VarChar, description)
-      .input('policy', sql.VarChar, cancellationPolicy)
-      .query(`
-        INSERT INTO venues (owner_id, venue_name, location, city, capacity, price_per_event, description, cancellation_policy)
-        OUTPUT INSERTED.venue_id
-        VALUES (@ownerId, @name, @location, @city, @capacity, @price, @desc, @policy)
-      `);
-
-    const newVenueId = venueInsert.recordset[0].venue_id;
-
-    // 2. Insert Images (if any)
-    if (images && images.length > 0) {
-      for (const url of images) {
-        if (url.trim() !== '') {
-          await pool.request()
-            .input('vid', sql.Int, newVenueId)
-            .input('url', sql.VarChar, url)
-            .query(`INSERT INTO venue_images (venue_id, image_url) VALUES (@vid, @url)`);
-        }
-      }
-    }
-
-    // 3. Insert Food Packages
-    if (foodPackages && foodPackages.length > 0) {
-      for (const food of foodPackages) {
-        if (food.name.trim() !== '') {
-          await pool.request()
-            .input('vid', sql.Int, newVenueId)
-            .input('name', sql.VarChar, food.name)
-            .input('desc', sql.VarChar, food.desc)
-            .input('price', sql.Decimal(10, 2), food.price)
-            .query(`INSERT INTO food_packages (venue_id, package_name, description, price_per_person) VALUES (@vid, @name, @desc, @price)`);
-        }
-      }
-    }
-
-    // 4. Insert Decorations
-    if (decorations && decorations.length > 0) {
-      for (const decor of decorations) {
-        if (decor.name.trim() !== '') {
-          await pool.request()
-            .input('vid', sql.Int, newVenueId)
-            .input('name', sql.VarChar, decor.name)
-            .input('desc', sql.VarChar, decor.desc)
-            .input('price', sql.Decimal(10, 2), decor.price)
-            .query(`INSERT INTO decorations (venue_id, decoration_name, description, price) VALUES (@vid, @name, @desc, @price)`);
-        }
-      }
-    }
-
-    res.json({ success: true, message: 'Venue successfully created!', venueId: newVenueId });
-  } catch (err) {
-    console.error('Add Venue Error:', err);
-    res.status(500).json({ success: false, message: err.message });
-  }
-});
-// ── GET CHAT MESSAGES (BI-DIRECTIONAL) ──────────────────────────────────────
-app.get('/api/chat/:bookingId', async (req, res) => {
-  try {
-    const result = await pool.request()
-      .input('bookingId', sql.Int, req.params.bookingId)
-      .query(`
-        SELECT m.*, u.full_name as sender_name 
-        FROM messages m
-        JOIN users u ON m.sender_id = u.user_id
-        WHERE m.booking_id = @bookingId
-        ORDER BY m.sent_at ASC
-      `);
-
-    res.json({ success: true, messages: result.recordset });
-  } catch (err) {
-    console.error("Chat GET Error:", err);
-    res.status(500).json({ success: false, message: err.message });
-  }
-});
-
-// ── POST CHAT MESSAGE / RECEIPT ─────────────────────────────────────────────
-// ── POST CHAT MESSAGE / RECEIPT ─────────────────────────────────────────────
-app.post('/api/chat/:bookingId', async (req, res) => {
-  // 1. Extract receiverId from the incoming request
-  const { userId, receiverId, message, messageType, imageData } = req.body;
-  const bookingId = req.params.bookingId;
-
-  const finalText = messageType === 'image' ? `[IMAGE]${imageData}` : message;
-
-  try {
-    const insert = await pool.request()
-      .input('bookingId', sql.Int, bookingId)
-      .input('senderId', sql.Int, userId)
-      .input('receiverId', sql.Int, receiverId) // 2. Add it as an SQL input
-      .input('msgText', sql.VarChar(sql.MAX), finalText)
-      .query(`
-        -- 3. Include receiver_id in the INSERT statement
-        INSERT INTO messages (booking_id, sender_id, receiver_id, message_text)
-        OUTPUT INSERTED.message_id, INSERTED.sent_at
-        VALUES (@bookingId, @senderId, @receiverId, @msgText)
-      `);
-
-    res.json({
-      success: true,
-      message_id: insert.recordset[0].message_id,
-      sent_at: insert.recordset[0].sent_at
-    });
-  } catch (err) {
-    console.error("Chat POST Error:", err);
-    res.status(500).json({ success: false, message: err.message });
-  }
-});
 // ── OWNER DASHBOARD: GET OWNER'S VENUES ──────────────────────────────────────
 app.get('/api/owner/my-venues/:ownerId', async (req, res) => {
   try {
@@ -575,23 +405,10 @@ app.get('/api/owner/my-venues/:ownerId', async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 });
+
 // ── START SERVER ──────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 5001;
 
 app.listen(PORT, () => {
-  console.log(`\n🚀 Server running on http://localhost:${PORT}`);
-  console.log('   POST  /api/signup');
-  console.log('   POST  /api/login');
-  console.log('   POST  /api/booking');
-  console.log('   GET   /api/venues');
-  console.log('   GET   /api/venues/search');
-  console.log('   GET   /api/venues/:venueId');
-  console.log('   GET   /api/booking/unavailable/:venueId');
-  console.log('   GET   /api/bookings/:userId');
-  console.log('   PATCH /api/booking/:bookingId/cancel');
-  console.log('   GET   /api/messages/:userId/:receiverId');
-  console.log('   POST  /api/messages');
-  console.log('   POST  /api/support');
-  console.log('   POST  /api/review');
-  console.log('   GET   /api/reviews/:venueId\n');
+  console.log(`\n Server running on http://localhost:${PORT}`);
 });

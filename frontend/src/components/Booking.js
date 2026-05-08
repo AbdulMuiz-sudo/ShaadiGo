@@ -13,14 +13,13 @@ function Booking() {
   const navigate = useNavigate();
   const venue = location.state?.venue;
 
-  // FIX 1: Changed key to 'user' to match what Login.jsx sets
   const loggedInUser = JSON.parse(localStorage.getItem('user') || 'null');
 
   const today = new Date();
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth());
   const [selectedDate, setSelectedDate] = useState(null);
-  const [unavailableDates, setUnavailableDates] = useState([]); // "YYYY-MM-DD" strings
+  const [unavailableDates, setUnavailableDates] = useState([]);
   const [calLoading, setCalLoading] = useState(false);
   const [message, setMessage] = useState({ text: '', type: '' });
   const [form, setForm] = useState({
@@ -28,9 +27,7 @@ function Booking() {
     eventType: '', guests: '', special: ''
   });
 
-  // Resolve venue id — handles both hardcoded (id) and DB (venue_id)
   const venueId = venue?.venue_id ?? venue?.id;
-  // FIX 2: Safely map new DB column names
   const safeVenueName = venue?.venue_name || venue?.name || 'Selected Venue';
 
   useEffect(() => {
@@ -45,15 +42,14 @@ function Booking() {
     fetch(`http://localhost:5001/api/booking/unavailable/${venueId}`)
       .then(r => r.json())
       .then(data => {
-        if (data.success) setUnavailableDates(data.dates); // ["2025-08-05", ...]
+        if (data.success) setUnavailableDates(data.dates);
       })
-      .catch(() => { }) // silently fail — calendar still works, just no blocked dates
+      .catch(() => { })
       .finally(() => setCalLoading(false));
   }, [venueId]);
 
   if (!venue || !loggedInUser) return null;
 
-  // Use price_per_event (DB) or priceNum (hardcoded) — whichever exists
   const hallPrice = Number(venue.price_per_event ?? venue.priceNum ?? 0);
   const serviceFee = Math.round(hallPrice * 0.05);
   const total = hallPrice + serviceFee;

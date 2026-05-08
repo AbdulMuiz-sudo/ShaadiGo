@@ -17,7 +17,6 @@ import AddVenue from './components/addvenue';
 import OwnerVenues from './components/ownervenues';
 import './App.css';
 
-// A layout wrapper so we don't have to copy-paste the header/footer on both pages
 function AuthLayout({ children }) {
     return (
         <div className="App">
@@ -36,25 +35,21 @@ function App() {
     return (
         <BrowserRouter>
             <Routes>
-                {/* Redirect the home page directly to login */}
                 <Route path="/" element={<Navigate to="/login" />} />
 
-                {/* Dedicated Auth Routes */}
                 <Route path="/login" element={<AuthLayout><Login /></AuthLayout>} />
                 <Route path="/signup" element={<AuthLayout><SignUp /></AuthLayout>} />
 
-                {/* Main App Routes */}
                 <Route path="/venues" element={<VenueSelection />} />
                 <Route path="/venue-detail" element={<VenueDetail />} />
                 <Route path="/booking" element={<Booking />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/chat" element={<Chat />} />
-                <Route path="/owner-dashboard" element={<OwnerDashboard />} /> {/* NEW ROUTE */}
+                <Route path="/owner-dashboard" element={<OwnerDashboard />} />
                 <Route path="/about" element={<AboutUs />} />
                 <Route path="/add-venue" element={<AddVenue />} />
                 <Route path="/owner-venues" element={<OwnerVenues />} />
-                {/* Catch-all fallback */}
                 <Route path="*" element={<Navigate to="/login" />} />
             </Routes>
         </BrowserRouter>

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Header from './Header';
 import Footer from './Footer';
 import { FiArrowLeft, FiPlus, FiTrash2, FiSave, FiImage, FiCoffee, FiStar } from 'react-icons/fi';
-import './style/Dashboard.css'; // Reusing dashboard styles for consistency
+import './style/Dashboard.css';
 
 function AddVenue() {
     const navigate = useNavigate();
@@ -12,13 +12,10 @@ function AddVenue() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
-    // Main Form State
     const [venue, setVenue] = useState({
         venueName: '', city: 'Lahore', location: '',
         capacity: '', price: '', description: '', cancellationPolicy: ''
     });
-
-    // Dynamic Arrays for nested data
     const [images, setImages] = useState(['']);
     const [food, setFood] = useState([{ name: '', desc: '', price: '' }]);
     const [decor, setDecor] = useState([{ name: '', desc: '', price: '' }]);
@@ -29,7 +26,6 @@ function AddVenue() {
 
     const handleChange = (e) => setVenue({ ...venue, [e.target.name]: e.target.value });
 
-    // Dynamic field handlers
     const handleImageChange = (index, value) => {
         const newImgs = [...images];
         newImgs[index] = value;

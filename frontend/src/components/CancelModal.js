@@ -13,7 +13,6 @@ export default function CancelModal({ booking, onClose, onConfirmed }) {
   const [cancelling, setCancelling] = useState(false);
   const [error, setError] = useState('');
 
-  // FIX: Updated local storage key to 'user'
   const loggedInUser = JSON.parse(localStorage.getItem('user') || 'null');
 
   const today = new Date();

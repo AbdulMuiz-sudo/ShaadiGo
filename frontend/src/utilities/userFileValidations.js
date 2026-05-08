@@ -1,17 +1,15 @@
-const MAX_FILE_SIZE_MB    = 10;
+const MAX_FILE_SIZE_MB = 10;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
-const ALLOWED_MIME_TYPES  = ["text/csv", "application/vnd.ms-excel", "text/plain"];
-const ALLOWED_EXTENSIONS  = [".csv"];
+const ALLOWED_MIME_TYPES = ["text/csv", "application/vnd.ms-excel", "text/plain"];
+const ALLOWED_EXTENSIONS = [".csv"];
 
-// Every one of these must be present (matched as substring, case-insensitive)
 const REQUIRED_COLUMNS = ["description", "debit", "credit", "balance"];
 
-// Friendly aliases for each required column — any one alias satisfies it
 const COLUMN_ALIASES = {
   description: ["description", "desc", "narration", "particulars", "details", "memo", "merchant"],
-  debit:       ["debit", "dr", "withdrawal", "withdrawals", "amount"],
-  credit:      ["credit", "cr", "deposit", "deposits"],
-  balance:     ["balance", "available balance", "running balance", "closing balance"],
+  debit: ["debit", "dr", "withdrawal", "withdrawals", "amount"],
+  credit: ["credit", "cr", "deposit", "deposits"],
+  balance: ["balance", "available balance", "running balance", "closing balance"],
 };
 
 /**
@@ -24,7 +22,7 @@ export function validateFile(file) {
     return { valid: false, error: "No file provided." };
   }
 
-  const fileName  = file.name || "";
+  const fileName = file.name || "";
   const extension = fileName.slice(fileName.lastIndexOf(".")).toLowerCase();
 
   if (!ALLOWED_EXTENSIONS.includes(extension)) {
